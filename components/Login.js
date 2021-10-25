@@ -11,10 +11,10 @@ export default class Login extends Component {
       password: "",
       name: "",
     };
-    this.onSignIn = this.onSignIn.bind(this); //to be able to use states in onSignUp function
+    this.onSignUp = this.onSignUp.bind(this); //to be able to use states in onSignUp function
   }
 
-  onSignIn() {
+  onSignUp() {
     const { email, password } = this.state;
     firebase
       .auth()
@@ -40,7 +40,7 @@ export default class Login extends Component {
           secureTextEntry={true}
           onChangeText={(password) => this.setState({ password: password })} //we change the state of the name with onChangeText function
         />
-        <Button onPress={() => this.onSignin()} title="Sign In" />
+        <Button onPress={() => this.onSignUp()} title="Sign In" />
       </View>
     );
   }

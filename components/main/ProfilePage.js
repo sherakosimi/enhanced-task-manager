@@ -46,7 +46,13 @@ function ProfilePage(props) {
           setUserPosts(posts);
         });
     }
-  }, [props.route.params.id]);
+
+    if (props.following.indexOf(props.route.params.uid) > -1) {
+      setFollowing(true);
+    } else {
+      setFollowing(false);
+    }
+  }, [props.route.params.uid, props.following]);
 
   const onFollow = () => {
     firebase
@@ -68,6 +74,10 @@ function ProfilePage(props) {
       .delete();
   };
 
+  const onLogout = () => {
+    firebase.auth().signOut();
+  };
+
   if (user === null) {
     return <View />;
 
@@ -87,7 +97,9 @@ function ProfilePage(props) {
               <Button title="Follow" onPress={() => onFollow()} />
             )}
           </View>
-        ) : null}
+        ) : (
+          <Button title="Log Out" onPress={() => onLogout()} />
+        )}
       </View>
 
       <View style={styles.containerGallery}>
@@ -129,6 +141,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
   posts: store.userState.posts,
+  following: store.userState.following,
 });
 
 export default connect(mapStateToProps, null)(ProfilePage);

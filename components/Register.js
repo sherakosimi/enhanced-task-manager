@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { View, Button, TextInput } from "react-native";
 import firebase from "firebase";
 
-export default class Register extends Component {
+export class Register extends Component {
   constructor(props) {
     super(props);
 
@@ -10,12 +10,13 @@ export default class Register extends Component {
       email: "",
       password: "",
       name: "",
+      surname: "",
     };
     this.onSignUp = this.onSignUp.bind(this); //to be able to use states in onSignUp function
   }
 
   onSignUp() {
-    const { email, password, name } = this.state;
+    const { email, password, name, surname } = this.state;
     firebase
       .auth()
       .createUserWithEmailAndPassword(email, password)
@@ -26,6 +27,7 @@ export default class Register extends Component {
           .doc(firebase.auth().currentUser.uid)
           .set({
             name,
+            surname,
             email,
           });
         console.log(result);
@@ -44,6 +46,10 @@ export default class Register extends Component {
           onChangeText={(name) => this.setState({ name: name })} //we change the state of the name with onChangeText function
         />
         <TextInput
+          placeholder="surname"
+          onChangeText={(surname) => this.setState({ surname: surname })} //we change the state of the name with onChangeText function
+        />
+        <TextInput
           placeholder="email"
           onChangeText={(email) => this.setState({ email: email })} //we change the state of the name with onChangeText function
         />
@@ -57,3 +63,4 @@ export default class Register extends Component {
     );
   }
 }
+export default Register;

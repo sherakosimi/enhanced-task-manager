@@ -5,6 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import LandingScreen from "./components/Landing";
 import RegisterScreen from "./components/Register";
+import LoginScreen from "./components/Login";
 import firebase from "firebase";
 import { Provider } from "react-redux";
 import rootReducers from "./redux/reducers";
@@ -13,10 +14,10 @@ import thunk from "redux-thunk";
 import MainScreen from "./components/Main";
 import TasksScreen from "./components/main/Tasks";
 import SearchScreen from "./components/main/Search";
-import FriendsScreen from "./components/main/Friends";
 import CalendarScreen from "./components/main/Calendar";
 import SaveScreen from "./components/main/Save";
 import ProfilePageScreen from "./components/main/ProfilePage";
+import ProfileDesign from "./components/main/ProfileDesign";
 
 import ProfileScreen from "./components/main/Profile";
 const store = createStore(rootReducers, applyMiddleware(thunk));
@@ -87,6 +88,11 @@ export class App extends Component {
               component={RegisterScreen}
               options={{ headerShown: true }}
             />
+            <Stack.Screen
+              name="Login"
+              component={LoginScreen}
+              options={{ headerShown: true }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       );
@@ -108,7 +114,11 @@ export class App extends Component {
             />
             <Stack.Screen name="Tasks" component={TasksScreen} />
             <Stack.Screen name="Calendar" component={CalendarScreen} />
-            <Stack.Screen name="Friends" component={FriendsScreen} />
+            <Stack.Screen
+              name="ProfileDesign"
+              component={ProfileDesign}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="Save"
               component={SaveScreen}
