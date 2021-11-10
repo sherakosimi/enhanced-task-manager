@@ -21,7 +21,7 @@ export default function App({ navigation }) {
 
   useEffect(() => {
     (async () => {
-      const cameraStatus = await Camera.requestPermissionsAsync();
+      const cameraStatus = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(cameraStatus.status === "granted");
 
       const galleyStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();

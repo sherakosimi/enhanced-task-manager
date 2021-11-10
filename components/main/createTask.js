@@ -35,6 +35,9 @@ import moment from "moment";
 
 export default function createTask(props) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
+  const [date, setDate] = useState(moment().format("DD.MM.YYYY"));
+  const [time, setTime] = useState(moment().format("HH:mm"));
 
   const [chooseData, setchooseData] = useState("Выбрать...");
   const [isModalVisible, setisModalVisible] = useState(false);
@@ -42,7 +45,6 @@ export default function createTask(props) {
   const [isModalVisible1, setisModalVisible1] = useState(false);
   const [chooseData2, setchooseData2] = useState("Выбрать...");
   const [isModalVisible2, setisModalVisible2] = useState(false);
-  const [date, setDate] = useState("11.10.2021");
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -53,9 +55,23 @@ export default function createTask(props) {
   };
 
   const handleConfirm = (date) => {
-    console.warn("A date has been picked: ", date);
-    console.log(moment(date).format("DD/MM/YYYY"));
+    setDate(moment(date).format("DD.MM.YYYY"));
+    console.log(moment(date).format("DD.MM.YYYY"));
     hideDatePicker();
+  };
+
+  const showTimePicker = () => {
+    setTimePickerVisibility(true);
+  };
+
+  const hideTimePicker = () => {
+    setTimePickerVisibility(false);
+  };
+
+  const handleConfirmTime = (time) => {
+    setTime(moment(time).format("HH:mm"));
+    console.log(moment(time).format("HH:mm"));
+    hideTimePicker();
   };
 
   const changeModalVisibility = (bool) => {
@@ -107,13 +123,7 @@ export default function createTask(props) {
                 <Icon name="menu" color="#1F4E5F" size={30} />
               </TouchableOpacity>
               <Text style={styles.headerText}>Друзья</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  props.navigation.navigate("Search");
-                }}
-              >
-                <Icon name="account-plus-outline" color="#1F4E5F" size={30} />
-              </TouchableOpacity>
+              <Icon name="account-plus-outline" color="#1F4E5F" size={30} />
             </View>
           </View>
           <ScrollView>
@@ -139,7 +149,79 @@ export default function createTask(props) {
                   setData={setData}
                 />
               </Modal>
+              <View style={styles.inputForm}>
+                <Text style={styles.captionInput}>Название</Text>
+                <TouchableOpacity
+                  style={styles.TouchableOpacity}
+                  onPress={() => changeModalVisibility2(true)}
+                >
+                  <Text style={styles.text}>Написать...</Text>
+                </TouchableOpacity>
+              </View>
 
+              <View style={styles.inputForm}>
+                <Text style={styles.captionInput}>Дата и Время</Text>
+                <View
+                  style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <TouchableOpacity
+                    style={styles.TouchableOpacityDate}
+                    onPress={showDatePicker}
+                  >
+                    <Text style={styles.textDate}>{date}</Text>
+                    <Icon name="calendar-range" color="#1F4E5F" size={25} />
+                    <DateTimePickerModal
+                      isVisible={isDatePickerVisible}
+                      mode="date"
+                      datePickerModeOnAndroid={"spinner"}
+                      onConfirm={handleConfirm}
+                      onCancel={hideDatePicker}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.TouchableOpacityTime}
+                    onPress={showTimePicker}
+                  >
+                    <Text style={styles.textDate}>{time}</Text>
+                    <Icon
+                      name="clock-time-four-outline"
+                      color="#1F4E5F"
+                      size={25}
+                    />
+                    <DateTimePickerModal
+                      isVisible={isTimePickerVisible}
+                      mode="time"
+                      onConfirm={handleConfirmTime}
+                      onCancel={hideTimePicker}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.inputForm}>
+                <Text style={styles.captionInput}>Важность:</Text>
+                <TouchableOpacity
+                  style={styles.TouchableOpacity}
+                  onPress={() => changeModalVisibility2(true)}
+                >
+                  <Text style={styles.text}>{chooseData2}</Text>
+                  <Icon name="chevron-down" color="#1F4E5F" size={35} />
+                </TouchableOpacity>
+              </View>
+              <Modal
+                transparent={true}
+                animationType="fade"
+                visible={isModalVisible2}
+                nRequestClose={() => changeModalVisibility2(false)}
+              >
+                <ImpLevel
+                  changeModalVisibility2={changeModalVisibility2}
+                  setData2={setData2}
+                />
+              </Modal>
               <View style={styles.inputForm}>
                 <Text style={styles.captionInput}>Участники:</Text>
                 <TouchableOpacity
@@ -202,56 +284,6 @@ export default function createTask(props) {
                   />
                 </View>
               </View>
-
-              <View style={styles.inputForm}>
-                <Text style={styles.captionInput}>Важность:</Text>
-                <TouchableOpacity
-                  style={styles.TouchableOpacity}
-                  onPress={() => changeModalVisibility2(true)}
-                >
-                  <Text style={styles.text}>{chooseData2}</Text>
-                  <Icon name="chevron-down" color="#1F4E5F" size={35} />
-                </TouchableOpacity>
-              </View>
-              <Modal
-                transparent={true}
-                animationType="fade"
-                visible={isModalVisible2}
-                nRequestClose={() => changeModalVisibility2(false)}
-              >
-                <ImpLevel
-                  changeModalVisibility2={changeModalVisibility2}
-                  setData2={setData2}
-                />
-              </Modal>
-
-              <View style={styles.inputForm}>
-                <Text style={styles.captionInput}>Дата и Время</Text>
-                <TouchableOpacity
-                  style={styles.TouchableOpacityDate}
-                  onPress={showDatePicker}
-                >
-                  <Text style={styles.textDate}>{date}</Text>
-                  <Icon name="calendar-range" color="#1F4E5F" size={25} />
-                  <DateTimePickerModal
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    datePickerModeOnAndroid={"spinner"}
-                    onConfirm={handleConfirm}
-                    onCancel={hideDatePicker}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.inputForm}>
-                <Text style={styles.captionInput}>Название</Text>
-                <TouchableOpacity
-                  style={styles.TouchableOpacity}
-                  onPress={() => changeModalVisibility2(true)}
-                >
-                  <Text style={styles.text}>Написать...</Text>
-                </TouchableOpacity>
-              </View>
               <View style={styles.inputForm}>
                 <Text style={styles.captionInput}>Описание</Text>
                 <TouchableOpacity
@@ -275,7 +307,7 @@ export default function createTask(props) {
           >
             <TouchableOpacity
               style={{
-                width: "85%",
+                width: "90%",
                 borderRadius: 10,
                 backgroundColor: "#1F4E5F",
                 height: 60,
@@ -333,7 +365,7 @@ const styles = StyleSheet.create({
   formContainer: {
     marginTop: 10,
     alignSelf: "center",
-    width: "85%",
+    width: "90%",
   },
   text: {
     marginVertical: 12,
@@ -376,6 +408,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  TouchableOpacityTime: {
+    width: "30%",
+    borderRadius: 10,
+    backgroundColor: "white",
+    alignSelf: "stretch",
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginRight: 50,
   },
   captionInput: {
     fontSize: 16,

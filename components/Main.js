@@ -47,7 +47,7 @@ export class Main extends Component {
       >
         <Drawer.Screen
           name="Tasks"
-          component={Friends}
+          component={CreateTask}
           options={{
             headerShown: false,
             drawerActiveTintColor: "#1F4E5F",
