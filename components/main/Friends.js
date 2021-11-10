@@ -6,8 +6,8 @@ import {
   Button,
   Image,
   TextInput,
-  ScrollView,
   FlatList,
+  ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -28,28 +28,11 @@ import {
   TouchableRipple,
   Switch,
 } from "react-native-paper";
-require("firebase/firestore");
+import { connect } from "react-redux";
 
-export default function Search(props) {
-  const [users, setUsers] = useState([]);
-
-  const fetchUsers = (search) => {
-    firebase
-      .firestore()
-      .collection("users")
-      .where("username", ">=", search)
-      .get()
-      .then((snapshot) => {
-        let users = snapshot.docs.map((doc) => {
-          console.log(doc.data());
-          const data = doc.data();
-          const id = doc.id;
-          return { id, ...data };
-        });
-        setUsers(users);
-        console.log(users);
-      });
-  };
+function Friends(props) {
+  const [user, setUser] = useState(null);
+  const [following, setFollowing] = useState([]);
 
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
@@ -57,6 +40,58 @@ export default function Search(props) {
     Rubik_700Bold,
   });
 
+  useEffect(() => {
+    const { currentUser, following } = props;
+
+    console.log(firebase.auth().currentUser.uid);
+    if (props.route.params.uid === firebase.auth().currentUser.uid) {
+      setUser(currentUser);
+      firebase
+        .firestore()
+        .collection("following")
+        .doc(props.route.params.uid)
+        .collection("userFollowing")
+        .get()
+        .then((snapshot) => {
+          let following = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            const id = doc.id;
+            return { id, ...data };
+          });
+          setFollowing(following);
+        });
+    } else {
+      firebase
+        .firestore()
+        .collection("users")
+        .doc(props.route.params.uid)
+        .get()
+        .then((snapshot) => {
+          if (snapshot.exists) {
+            setUser(snapshot.data());
+          } else {
+            console.log("does not exist");
+          }
+        });
+      firebase
+        .firestore()
+        .collection("following")
+        .doc(props.route.params.uid)
+        .collection("userFollowing")
+        .get()
+        .then((snapshot) => {
+          let following = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            const id = doc.id;
+            return { id, ...data };
+          });
+          setFollowing(following);
+        });
+    }
+  }, [props.route.params.uid, props.following]);
+
+  console.log(firebase.auth().currentUser.uid);
+  console.log(following);
   if (!fontsLoaded) {
     return <View></View>;
   } else {
@@ -72,15 +107,17 @@ export default function Search(props) {
         >
           <View style={styles.headerContainer}>
             <View style={styles.headerContainer1}>
-              <TouchableOpacity onPress={() => props.navigation.popToTop()}>
-                <Icon
-                  name="chevron-left-circle-outline"
-                  color="#1F4E5F"
-                  size={30}
-                />
+              <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
+                <Icon name="menu" color="#1F4E5F" size={30} />
               </TouchableOpacity>
-              <Text style={styles.headerText}>Добавить Друга</Text>
-              <Icon name="account-plus-outline" color="transparent" size={30} />
+              <Text style={styles.headerText}>Друзья</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  props.navigation.navigate("Search");
+                }}
+              >
+                <Icon name="account-plus-outline" color="#1F4E5F" size={30} />
+              </TouchableOpacity>
             </View>
           </View>
           <View style={styles.searchBar}>
@@ -90,26 +127,15 @@ export default function Search(props) {
               color="#A9A9A9"
               size={22}
             />
-            <TextInput
-              style={styles.input}
-              onChangeText={(search) => fetchUsers(search)}
-              placeholder="Поиск Людей"
-            />
+            <TextInput style={styles.input} placeholder="Поиск Друзей" />
           </View>
-          <View style={styles.flatlist}>
+          <View style={styles.listContainer}>
             <FlatList
               numColumns={1}
               horizontal={false}
-              data={users}
+              data={following}
               renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.friendBox2}
-                  onPress={() =>
-                    props.navigation.navigate("Profile Page", {
-                      uid: item.id,
-                    })
-                  }
-                >
+                <TouchableOpacity style={styles.friendBox2}>
                   <View style={styles.imageContainer}>
                     <Image
                       style={styles.image}
@@ -123,30 +149,9 @@ export default function Search(props) {
                     <Text style={styles.name}>{item.name}</Text>
                     <Text style={styles.username}>{item.username}</Text>
                   </View>
-                  <TouchableOpacity
-                    onPress={() =>
-                      props.navigation.navigate("Profile Page", {
-                        uid: item.id,
-                      })
-                    }
-                    style={{ right: 0, position: "absolute", paddingRight: 15 }}
-                  >
-                    <Icon
-                      name="account-plus-outline"
-                      color="#1F4E5F"
-                      size={24}
-                    />
+                  <TouchableOpacity style={{ marginLeft: "35%" }}>
+                    <Icon name="forum" color="#1F4E5F" size={24} />
                   </TouchableOpacity>
-
-                  {/* <TouchableOpacity
-                    onPress={() =>
-                      props.navigation.navigate("Profile Page", {
-                        uid: item.id,
-                      })
-                    }
-                  >
-                    <Text> {item.name}</Text>
-                  </TouchableOpacity> */}
                 </TouchableOpacity>
               )}
             />
@@ -199,40 +204,42 @@ const styles = StyleSheet.create({
     height: 30,
     fontSize: 14,
   },
-  flatlist: {
-    marginTop: 10,
-    width: "90%",
+  listContainer: {
     flexDirection: "column",
+    marginTop: 15,
+    width: "90%",
     alignSelf: "center",
   },
-  user: {
-    height: 20,
-    backgroundColor: "gray",
-  },
-  friendBox2: {
+  friendBox: {
     backgroundColor: "white",
-    height: 60,
+    height: 72,
     borderRadius: 15,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-start",
-    marginTop: 3,
-    borderColor: "#4E6E79",
-    borderWidth: 0.3,
+  },
+  friendBox2: {
+    backgroundColor: "white",
+    height: 72,
+    borderRadius: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginTop: 15,
   },
   imageContainer: {
     marginLeft: 15,
-    height: 35,
-    width: 35,
+    height: 50,
+    width: 50,
     backgroundColor: "#1F4E5F",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
   image: {
-    borderRadius: 8,
-    width: 30,
-    height: 30,
+    borderRadius: 10,
+    width: 46,
+    height: 46,
   },
   userInfo: {
     height: 40,
@@ -251,3 +258,10 @@ const styles = StyleSheet.create({
     fontFamily: "Rubik_400Regular",
   },
 });
+
+const mapStateToProps = (store) => ({
+  currentUser: store.userState.currentUser,
+  posts: store.userState.posts,
+  following: store.userState.following,
+});
+export default connect(mapStateToProps, null)(Friends);

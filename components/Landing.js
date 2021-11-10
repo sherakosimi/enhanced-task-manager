@@ -39,10 +39,23 @@ export default function Landing({ navigation }) {
         >
           <View style={styles.headerContainer}>
             <Image
-              style={{ width: 100, height: 50, marginTop: 60, marginLeft: 20 }}
+              style={{
+                width: 100,
+                height: 50,
+                marginTop: "12%",
+                marginLeft: 20,
+              }}
               source={require("./main/logoGotcha.png")}
             />
-            <Text style={styles.welcomeText}> WELCOME </Text>
+            <View
+              style={{
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={styles.welcomeText}> WELCOME </Text>
+            </View>
           </View>
           <View style={styles.buttonContainer}>
             <View style={styles.socialContainer}>
@@ -59,20 +72,21 @@ export default function Landing({ navigation }) {
                 <Image source={require("../assets/images/vk.png")} />
               </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.button}>
-              <Text>HAHAHAHAHHA</Text>
+            <Text style={styles.orCaption}> OR </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Login")}
+              style={styles.button}
+            >
+              <Text style={styles.loginCaption}>Войти</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-              <Text>HAHAHAHAHHA</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Register")}
+              style={styles.button1}
+            >
+              <Text style={styles.loginCaption1}>Регистрация</Text>
             </TouchableOpacity>
           </View>
         </LinearGradient>
-
-        {/* <Button title="Login" onPress={() => navigation.navigate("Login")} />
-      <Button
-        title="Register"
-        onPress={() => navigation.navigate("Register")}
-      /> */}
       </View>
     );
   }
@@ -83,7 +97,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerContainer: {
-    height: 550,
+    height: "60%",
     width: "100%",
     backgroundColor: "#FFFFFF",
     borderBottomLeftRadius: 100,
@@ -92,13 +106,12 @@ const styles = StyleSheet.create({
   welcomeText: {
     fontFamily: "Rubik_500Medium",
     fontSize: 60,
-    alignSelf: "center",
-    paddingTop: "40%",
     color: "#1F4E5F",
+    paddingBottom: "20%",
   },
   buttonContainer: {
     flexDirection: "column",
-    backgroundColor: "purple",
+
     alignItems: "center",
     width: "100%",
     height: 300,
@@ -107,8 +120,19 @@ const styles = StyleSheet.create({
   button: {
     width: "80%",
     height: 60,
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#7C969F",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+  },
+  button1: {
+    width: "80%",
+    height: 60,
     backgroundColor: "#1F4E5F",
     alignItems: "center",
+    justifyContent: "center",
     borderRadius: 20,
   },
   socialContainer: {
@@ -117,7 +141,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "80%",
     height: 60,
-    backgroundColor: "blue",
   },
   socialItem1: {
     width: 50,
@@ -139,16 +162,31 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 100,
-    backgroundColor: "#1F4E5F",
     justifyContent: "center",
+    backgroundColor: "#3b5998",
     alignItems: "center",
   },
   socialItem4: {
     width: 50,
     height: 50,
     borderRadius: 100,
-    backgroundColor: "#1F4E5Fl",
     justifyContent: "center",
+    backgroundColor: "#4C75A3",
     alignItems: "center",
+  },
+  orCaption: {
+    fontFamily: "Rubik_500Medium",
+    fontSize: 15,
+    color: "black",
+  },
+  loginCaption: {
+    fontFamily: "Rubik_500Medium",
+    fontSize: 16,
+    color: "#1F4E5F",
+  },
+  loginCaption1: {
+    fontFamily: "Rubik_500Medium",
+    fontSize: 16,
+    color: "white",
   },
 });

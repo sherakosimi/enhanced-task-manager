@@ -23,18 +23,32 @@ import {
 } from "react-native-paper";
 
 export function DrawerContent(props) {
-  const { currentUser, posts } = props;
-  console.log(firebase.auth().currentUser);
-  const [isDarkTheme, setIsDarkTheme] = React.useState(false);
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
 
+  useEffect(() => {
+    firebase
+      .firestore()
+      .collection("users")
+      .doc(firebase.auth().currentUser.uid)
+      .get()
+      .then((snapshot) => {
+        if (snapshot.exists) {
+          setName(snapshot.data().name);
+          setUsername(snapshot.data().username);
+        } else {
+          console.log("does not exist");
+        }
+      });
+  });
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
     Rubik_500Medium,
     Rubik_700Bold,
   });
 
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme);
+  const onLogout = () => {
+    firebase.auth().signOut();
   };
 
   if (!fontsLoaded) {
@@ -53,43 +67,39 @@ export function DrawerContent(props) {
               ]}
             >
               <View style={styles.userInfoSection}>
-                <TouchableOpacity style={{ flexDirection: "row" }}>
-                  <Avatar.Image
-                    source={{
-                      uri:
-                        "https://www.meme-arsenal.com/memes/d701774e6840211ad6c99153e34481c6.jpg",
+                <TouchableOpacity
+                  style={{ flexDirection: "row" }}
+                  onPress={() => {
+                    props.navigation.navigate("Profile Page", {
+                      uid: firebase.auth().currentUser.uid,
+                    });
+                  }}
+                >
+                  <View
+                    style={{
+                      borderRadius: 100,
+                      width: 60,
+                      height: 60,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      backgroundColor: "#1F4E5F",
                     }}
-                    size={60}
-                  />
-                  <View style={{ marginLeft: 15, flexDirection: "column" }}>
-                    <Title style={styles.title}>John Smith </Title>
-                    <Caption style={styles.caption}>@johnsmith</Caption>
-                  </View>
-                </TouchableOpacity>
-
-                {/* <View style={styles.row}>
-                  <View style={styles.section}>
-                    <DrawerItem
-                      icon={({ color, size }) => (
-                        <Icon
-                          name="checkbox-marked-circle-outline"
-                          color={color}
-                          size={size}
-                        />
-                      )}
-                      label=""
-                      onPress={() => {
-                        props.navigation.navigate("Tasks");
+                  >
+                    <Avatar.Image
+                      source={{
+                        uri:
+                          "https://www.meme-arsenal.com/memes/d701774e6840211ad6c99153e34481c6.jpg",
                       }}
+                      size={55}
                     />
                   </View>
-                  <View style={styles.section}>
-                    <Paragraph style={[styles.paragraph, styles.caption]}>
-                      100
-                    </Paragraph>
-                    <Caption style={styles.caption}>Total Tasks</Caption>
+                  <View style={{ marginLeft: 15, flexDirection: "column" }}>
+                    <Title style={styles.title}>{name} </Title>
+                    <Caption style={styles.caption}>
+                      @{username.toLowerCase()}
+                    </Caption>
                   </View>
-                </View> */}
+                </TouchableOpacity>
               </View>
             </LinearGradient>
             <View style={styles.menuContainer}>
@@ -106,7 +116,7 @@ export function DrawerContent(props) {
                     <Text style={styles.labelCaption}>Задачи</Text>
                   )}
                   onPress={() => {
-                    props.navigation.navigate("Friends");
+                    props.navigation.navigate("Profile");
                   }}
                 />
                 <DrawerItem
@@ -123,16 +133,16 @@ export function DrawerContent(props) {
                 <DrawerItem
                   icon={({ color, size }) => (
                     <Icon
-                      name="calendar-text-outline"
+                      name="account-multiple-outline"
                       color="#1F4E5F"
                       size={size}
                     />
                   )}
                   label={({ color, size }) => (
-                    <Text style={styles.labelCaption}>Календарь</Text>
+                    <Text style={styles.labelCaption}>Друзья</Text>
                   )}
                   onPress={() => {
-                    props.navigation.navigate("Calendar", {
+                    props.navigation.navigate("Friends", {
                       uid: firebase.auth().currentUser.uid,
                     });
                   }}
@@ -240,10 +250,10 @@ export function DrawerContent(props) {
                 icon={({ color, size }) => (
                   <Icon name="door" color="#1F4E5F" size={size} />
                 )}
+                onPress={() => onLogout()}
                 label={({ color, size }) => (
                   <Text style={styles.labelCaption}>Выйти</Text>
                 )}
-                onPress={() => {}}
               />
             </Drawer.Section>
           </View>

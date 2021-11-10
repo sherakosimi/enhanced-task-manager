@@ -18,6 +18,9 @@ import CalendarScreen from "./components/main/Calendar";
 import SaveScreen from "./components/main/Save";
 import ProfilePageScreen from "./components/main/ProfilePage";
 import ProfileDesign from "./components/main/ProfileDesign";
+import Tasks1 from "./components/main/Tasks1";
+import FriendsPage from "./components/main/Friends";
+import Projects from "./components/main/Projects";
 
 import ProfileScreen from "./components/main/Profile";
 const store = createStore(rootReducers, applyMiddleware(thunk));
@@ -86,12 +89,12 @@ export class App extends Component {
             <Stack.Screen
               name="Register"
               component={RegisterScreen}
-              options={{ headerShown: true }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="Login"
               component={LoginScreen}
-              options={{ headerShown: true }}
+              options={{ headerShown: false }}
             />
           </Stack.Navigator>
         </NavigationContainer>
@@ -120,12 +123,27 @@ export class App extends Component {
               options={{ headerShown: false }}
             />
             <Stack.Screen
+              name="Friends"
+              component={FriendsPage}
+              options={{ headerShown: false }}
+              navigation={this.props.navigation}
+            />
+            <Stack.Screen
+              name="Search"
+              component={SearchScreen}
+              options={{ headerShown: false }}
+              navigation={this.props.navigation}
+            />
+            <Stack.Screen
               name="Save"
               component={SaveScreen}
               navigation={this.props.navigation}
             />
-            <Stack.Screen name="Profile Page" component={ProfilePageScreen} />
-            <Stack.Screen name="Search Page" component={SearchScreen} />
+            <Stack.Screen
+              name="Profile Page"
+              options={{ headerShown: false }}
+              component={ProfilePageScreen}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </Provider>

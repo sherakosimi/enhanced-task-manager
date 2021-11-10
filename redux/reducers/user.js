@@ -18,7 +18,6 @@ export const user = (state = initialState, action) => {
         ...state,
         currentUser: action.currentUser,
       };
-
     case USER_POSTS_STATE_CHANGE:
       return {
         ...state,
@@ -31,12 +30,7 @@ export const user = (state = initialState, action) => {
         following: action.following,
       };
     case CLEAR_DATA:
-      return {
-        currentUser: null,
-        posts: [],
-        following: [],
-      };
-
+      return initialState;
     default:
       return state;
   }

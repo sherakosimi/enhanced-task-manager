@@ -17,6 +17,10 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { DrawerContent } from "./main/DrawerContent";
 import ProfilePage from "./main/ProfilePage";
 import ProfilePage1 from "./main/ProfileDesign";
+import Tasks1 from "./main/Tasks1";
+import Friends from "./main/Friends";
+import Projects from "./main/Projects";
+import CreateTask from "./main/createTask";
 const Drawer = createDrawerNavigator();
 
 export class Main extends Component {
@@ -43,33 +47,40 @@ export class Main extends Component {
       >
         <Drawer.Screen
           name="Tasks"
-          component={ProfilePage1}
+          component={Friends}
           options={{
-            drawerIcon: ({ tintColor }) => {
-              return (
-                <MaterialCommunityIcons
-                  name="format-list-bulleted-square"
-                  style={{ fontSize: 24 }}
-                />
-              );
-            },
-            headerTransparent: true,
+            headerShown: false,
             drawerActiveTintColor: "#1F4E5F",
             headerTitleStyle: {
               paddingRight: 200,
               color: "#1F4E5F",
             },
           }}
-        />
-        <Drawer.Screen name="Search" component={SearchScreen} />
-        <Drawer.Screen name="Calendar" component={ProfilePage} />
-        <Drawer.Screen
-          name="Friends"
-          component={SearchScreen}
           navigation={this.props.navigation}
         />
+        <Drawer.Screen
+          name="Calendar"
+          component={ProfilePage}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Drawer.Screen
+          name="Friends"
+          component={Friends}
+          navigation={this.props.navigation}
+          options={{
+            headerShown: false,
+          }}
+        />
         <Drawer.Screen name="Profile" component={ProfileScreen} />
-        <Drawer.Screen name="ProfilePage" component={ProfilePage} />
+        <Drawer.Screen
+          name="ProfilePage"
+          component={ProfilePage}
+          options={{
+            headerShown: false,
+          }}
+        />
       </Drawer.Navigator>
     );
   }

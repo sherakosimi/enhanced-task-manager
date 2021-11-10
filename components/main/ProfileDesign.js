@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -7,6 +7,8 @@ import {
   Image,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import firebase from "firebase";
 import {
   useFonts,
   Rubik_400Regular,
@@ -23,8 +25,34 @@ import {
   TouchableRipple,
   Switch,
 } from "react-native-paper";
+import { connect } from "react-redux";
 
-export default function ProfileDesign({ navigation }) {
+function ProfileDesign(props) {
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [user, setUser] = useState(null);
+  const [following, setFollowing] = useState(false);
+
+  console.log(firebase.auth().currentUser);
+
+  useEffect(() => {
+    const { currentUser, posts } = props;
+    setName(firebase.auth().currentUser.displayName);
+
+    firebase
+      .firestore()
+      .collection("users")
+      .doc(firebase.auth().currentUser.uid)
+      .get()
+      .then((snapshot) => {
+        if (snapshot.exists) {
+          setUsername(snapshot.data().username);
+        } else {
+          console.log("does not exist");
+        }
+      });
+  });
+
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
     Rubik_500Medium,
@@ -44,6 +72,15 @@ export default function ProfileDesign({ navigation }) {
           ]}
         >
           <View style={styles.headerContainer}>
+            <View style={styles.headerContainer1}>
+              <TouchableOpacity onPress={() => props.navigation.popToTop()}>
+                <Icon
+                  name="chevron-left-circle-outline"
+                  color="#1F4E5F"
+                  size={30}
+                />
+              </TouchableOpacity>
+            </View>
             <View style={styles.photoText}>
               <View>
                 <Text style={styles.taskTitle}>19</Text>
@@ -62,8 +99,8 @@ export default function ProfileDesign({ navigation }) {
               </View>
             </View>
             <View style={styles.nameContainer}>
-              <Text style={styles.name}>John Smith</Text>
-              <Text style={styles.username}>@jsmith</Text>
+              <Text style={styles.name}>{name}</Text>
+              <Text style={styles.username}>@{username.toLowerCase()}</Text>
             </View>
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.button}>
@@ -81,6 +118,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  headerContainer1: {
+    alignSelf: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "87%",
+    marginLeft: "1%",
+    marginTop: "5%",
+  },
   headerContainer: {
     height: 350,
     backgroundColor: "#FFFFFF",
@@ -93,7 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     alignItems: "center",
     flexDirection: "row",
-    marginTop: 100,
+    paddingTop: "8%",
   },
   taskTitle: {
     color: "#1F4E5F",
@@ -144,3 +190,9 @@ const styles = StyleSheet.create({
     fontFamily: "Rubik_500Medium",
   },
 });
+const mapStateToProps = (store) => ({
+  currentUser: store.userState.currentUser,
+  posts: store.userState.posts,
+  following: store.userState.following,
+});
+export default connect(mapStateToProps, null)(ProfileDesign);
