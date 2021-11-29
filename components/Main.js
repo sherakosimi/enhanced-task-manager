@@ -21,6 +21,10 @@ import Tasks1 from "./main/Tasks1";
 import Friends from "./main/Friends";
 import Projects from "./main/Projects";
 import CreateTask from "./main/createTask";
+import { relativeTimeThreshold } from "moment";
+import SaveScreen from "./main/Save";
+import createProject from "./main/createProject";
+import CommentsTest from "./main/commentTest";
 const Drawer = createDrawerNavigator();
 
 export class Main extends Component {
@@ -46,28 +50,41 @@ export class Main extends Component {
         }}
       >
         <Drawer.Screen
-          name="Tasks"
-          component={CreateTask}
+          name="Calendar"
+          component={CommentsTest}
           options={{
             headerShown: false,
-            drawerActiveTintColor: "#1F4E5F",
-            headerTitleStyle: {
-              paddingRight: 200,
-              color: "#1F4E5F",
-            },
           }}
           navigation={this.props.navigation}
         />
         <Drawer.Screen
-          name="Calendar"
-          component={ProfilePage}
+          name="Tasks1"
+          component={CommentsTest}
+          options={{
+            headerShown: false,
+          }}
+          navigation={this.props.navigation}
+        />
+
+        <Drawer.Screen
+          name="Friends"
+          component={Friends}
+          navigation={this.props.navigation}
           options={{
             headerShown: false,
           }}
         />
         <Drawer.Screen
-          name="Friends"
-          component={Friends}
+          name="Create Task"
+          component={CreateTask}
+          navigation={this.props.navigation}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Drawer.Screen
+          name="Projects"
+          component={Projects}
           navigation={this.props.navigation}
           options={{
             headerShown: false,

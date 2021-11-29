@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
-  Button,
   Image,
   TextInput,
   FlatList,
@@ -19,14 +18,14 @@ import {
   Rubik_700Bold,
 } from "@expo-google-fonts/rubik";
 import { Text } from "react-native-paper";
-import { TaskType, People, ImpLevel } from "./Pickers";
+import { People, ImpLevel } from "./Pickers";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import firebase from "firebase";
 require("firebase/firestore");
 require("firebase/firebase-storage");
 
-export default function createTask(props) {
+export default function createProject(props) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [date, setDate] = useState(moment().format("DD.MM.YYYY"));
@@ -37,6 +36,7 @@ export default function createTask(props) {
   const [imgUrl, setImgUrl] = useState("");
 
   const [caption, setCaption] = useState("");
+  const [projectID, setProjectID] = useState("");
   const [description, setDescription] = useState("");
 
   const [taskType, setchooseData] = useState("Выбрать...");
@@ -47,14 +47,32 @@ export default function createTask(props) {
   const [isModalVisible2, setisModalVisible2] = useState(false);
 
   const savePostData = () => {
+    for (let i = 0; i < participants.length; i++) {
+      firebase
+        .firestore()
+        .collection("posts")
+        .doc(participants[i].id)
+        .collection("userPosts")
+        .add({
+          taskType,
+          caption,
+          participants,
+          description,
+          date,
+          time,
+          importantLevel,
+          creation: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+    }
+
     firebase
       .firestore()
       .collection("posts")
       .doc(firebase.auth().currentUser.uid)
-      .collection("userPosts")
+      .collection("projects")
+      .doc(projectID)
       .add({
-        creator: firebase.auth().currentUser.uid,
-        taskType,
+        projectID,
         caption,
         participants,
         description,
@@ -64,9 +82,7 @@ export default function createTask(props) {
         creation: firebase.firestore.FieldValue.serverTimestamp(),
       })
       .then(function () {
-        props.navigation.navigate("Tasks1", {
-          uid: firebase.auth().currentUser.uid,
-        });
+        props.navigation.navigate("Projects");
       });
   };
 
@@ -165,52 +181,39 @@ export default function createTask(props) {
         >
           <View style={styles.headerContainer}>
             <View style={styles.headerContainer1}>
-              <TouchableOpacity
-                onPress={() => props.navigation.goBack("Tasks1")}
-              >
+              <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
                 <Icon name="menu" color="#1F4E5F" size={30} />
               </TouchableOpacity>
               <Text style={styles.headerText}>Друзья</Text>
-              <Icon name="account-plus-outline" color="#1F4E5F" size={30} />
+              <Icon name="account-plus-outline" color="transparent" size={30} />
             </View>
           </View>
           <ScrollView>
             <View style={styles.formContainer}>
               <View style={styles.inputForm}>
-                <Text style={styles.captionInput}>Тип задачи:</Text>
-                <TouchableOpacity
-                  style={styles.TouchableOpacity}
-                  onPress={() => changeModalVisibility(true)}
-                >
-                  <Text style={styles.text}>{taskType}</Text>
-                  <Icon name="chevron-down" color="#1F4E5F" size={35} />
-                </TouchableOpacity>
-              </View>
-              <Modal
-                transparent={true}
-                animationType="fade"
-                visible={isModalVisible}
-                nRequestClose={() => changeModalVisibility(false)}
-              >
-                <TaskType
-                  changeModalVisibility={changeModalVisibility}
-                  setData={setData}
-                />
-              </Modal>
-              <View style={styles.inputForm}>
                 <Text style={styles.captionInput}>Название</Text>
                 <View style={styles.TouchableOpacity}>
                   <TextInput
-                    style={styles.text1}
+                    style={styles.text}
                     placeholder="Ввести"
                     placeholderTextColor="#7C969F"
                     onChangeText={(caption) => setCaption(caption)}
                   />
                 </View>
               </View>
-
               <View style={styles.inputForm}>
-                <Text style={styles.captionInput}>Дата и Время</Text>
+                <Text style={styles.captionInput}>ID</Text>
+                <View style={styles.TouchableOpacity}>
+                  <TextInput
+                    style={styles.text}
+                    placeholder="Ввести"
+                    placeholderTextColor="#7C969F"
+                    onChangeText={(projectID) => setProjectID(projectID)}
+                  />
+                </View>
+              </View>
+              <View style={styles.inputForm}>
+                <Text style={styles.captionInput}>Дата и Время Окончания</Text>
                 <View
                   style={{
                     width: "100%",
@@ -361,6 +364,7 @@ export default function createTask(props) {
                 >
                   <TextInput
                     style={styles.text1}
+                    multiline={true}
                     placeholder="Ввести"
                     placeholderTextColor="#7C969F"
                     onChangeText={(description) => setDescription(description)}
@@ -450,12 +454,13 @@ const styles = StyleSheet.create({
     color: "#7C969F",
   },
   text1: {
-    marginVertical: 12,
     fontSize: 18,
     padding: 5,
     fontFamily: "Rubik_400Regular",
     color: "#7C969F",
     width: "100%",
+    height: "90%",
+    marginVertical: 10,
   },
   textDate: {
     marginVertical: 12,
@@ -475,7 +480,7 @@ const styles = StyleSheet.create({
   },
 
   TouchableOpacity1: {
-    height: 100,
+    height: 150,
     borderRadius: 10,
     backgroundColor: "white",
     alignSelf: "stretch",

@@ -6,11 +6,13 @@ import {
   FlatList,
   Button,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import firebase from "firebase";
 require("firebase/firestore");
+require("firebase/firebase-storage");
 import { connect } from "react-redux";
 import {
   useFonts,
@@ -33,13 +35,14 @@ function ProfilePage(props) {
   const [userPosts, setUserPosts] = useState([]);
   const [user, setUser] = useState(null);
   const [following, setFollowing] = useState(false);
-
+  const [imageName, setImageName] = useState("");
+  const [imgUrl, setImgUrl] = useState("");
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
     Rubik_500Medium,
     Rubik_700Bold,
   });
-
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const { currentUser, posts } = props;
 
@@ -77,6 +80,18 @@ function ProfilePage(props) {
         });
     }
 
+    let imageRef = firebase
+      .storage()
+      .ref("profilepicture/" + props.route.params.uid + "/" + "profilePicture");
+    imageRef
+      .getDownloadURL()
+      .then((url) => {
+        //from url you can fetched the uploaded image easily
+        setImageName({ profileImageUrl: url });
+        console.log(url);
+      })
+      .catch((e) => console.log("getting downloadURL of image error => ", e));
+
     if (props.following.indexOf(props.route.params.uid) > -1) {
       setFollowing(true);
     } else {
@@ -85,19 +100,50 @@ function ProfilePage(props) {
   }, [props.route.params.uid, props.following]);
 
   const onFollow = () => {
-    firebase
-      .firestore()
-      .collection("following")
-      .doc(firebase.auth().currentUser.uid)
-      .collection("userFollowing")
-      .doc(props.route.params.uid)
-      .set({
-        id: props.route.params.uid,
-        email: user.email,
-        name: user.name,
-        username: user.username,
-      });
+    let urlImage;
+
+    let imageRef = firebase
+      .storage()
+      .ref("profilepicture/" + props.route.params.uid + "/" + "profilePicture");
+    imageRef
+      .getDownloadURL()
+      .then((url) => {
+        firebase
+          .firestore()
+          .collection("following")
+          .doc(firebase.auth().currentUser.uid)
+          .collection("userFollowing")
+          .doc(props.route.params.uid)
+          .set({
+            id: props.route.params.uid,
+            email: user.email,
+            name: user.name,
+            username: user.username,
+            urlImage: url,
+          });
+        //from url you can fetched the uploaded image easily
+      })
+      .catch(() =>
+        firebase
+          .firestore()
+          .collection("following")
+          .doc(firebase.auth().currentUser.uid)
+          .collection("userFollowing")
+          .doc(props.route.params.uid)
+          .set({
+            id: props.route.params.uid,
+            email: user.email,
+            name: user.name,
+            username: user.username,
+            urlImage: "",
+          })
+      );
   };
+
+  function onLoading(value, label) {
+    setLoading(value);
+  }
+
   const onUnfollow = () => {
     firebase
       .firestore()
@@ -108,8 +154,6 @@ function ProfilePage(props) {
       .delete();
   };
 
-  console.log(props.route);
-  console.log(userPosts);
   const onLogout = () => {
     firebase.auth().signOut();
   };
@@ -141,13 +185,51 @@ function ProfilePage(props) {
                 <Text style={styles.taskTitle}>19</Text>
                 <Text style={styles.taskCaption}>Завершенных Задач</Text>
               </View>
-              <Avatar.Image
-                source={{
-                  uri:
-                    "https://www.meme-arsenal.com/memes/d701774e6840211ad6c99153e34481c6.jpg",
+              <TouchableOpacity
+                style={{
+                  borderRadius: 100,
+                  width: 105,
+                  height: 105,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#1F4E5F",
                 }}
-                size={100}
-              />
+              >
+                {loading && (
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      width: 80,
+                      zIndex: 0,
+                      alignContent: "center",
+                      backgroundColor: "white",
+                      height: 100,
+                      width: 100,
+                      borderRadius: 100,
+                      position: "absolute",
+                    }}
+                  >
+                    <ActivityIndicator color="#1F4E5F" />
+                  </View>
+                )}
+                {
+                  <Image
+                    onLoadStart={() => onLoading(true, "onLoadStart")}
+                    onLoadEnd={() => onLoading(false, "onLoadStart")}
+                    source={{
+                      uri: imageName.profileImageUrl,
+                    }}
+                    style={{
+                      width: 100,
+                      height: 100,
+                      borderRadius: 100,
+                      zIndex: 0,
+                    }}
+                  />
+                }
+              </TouchableOpacity>
+
               <View>
                 <Text style={styles.taskTitle}>24</Text>
                 <Text style={styles.taskCaption}>Текущих Задач</Text>
@@ -185,7 +267,7 @@ function ProfilePage(props) {
               )}
             </View>
           </View>
-
+          {/* 
           <FlatList
             numColumns={1}
             horizontal={false}
@@ -200,7 +282,7 @@ function ProfilePage(props) {
                 />
               </View>
             )}
-          />
+          /> */}
         </LinearGradient>
       </View>
       // <View style={styles.container}>

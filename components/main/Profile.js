@@ -57,8 +57,8 @@ export default function App({ navigation }) {
     return <Text>No access to camera</Text>;
   }
   return (
-    <View>
-      <View style={styles.container}>
+    <View style={{ flex: 1 }}>
+      <View style={styles.cameraContainer}>
         <Camera
           style={styles.fixedRatio}
           type={type}
@@ -66,34 +66,33 @@ export default function App({ navigation }) {
           ref={(ref) => setCamera(ref)}
         />
       </View>
-      <Button
-        title="Flip Image"
-        onPress={() => {
-          setType(
-            type === Camera.Constants.Type.back
-              ? Camera.Constants.Type.front
-              : Camera.Constants.Type.back
-          );
-        }}
-      ></Button>
-      <Button title="Take Picture" onPress={() => takePicture()} />
-      <Button title="Pick Image" onPress={() => pickImage()} />
-      <Button
-        title="Save Image"
-        onPress={() => navigation.navigate("Save", { image })}
-      />
-      {image && <Image source={{ uri: image }} style={{ flex: 1 }} />}
+      <View style={{ flexDirection: "row" }}>
+        <Button
+          title="Flip Image"
+          onPress={() => {
+            setType(
+              type === Camera.Constants.Type.back
+                ? Camera.Constants.Type.front
+                : Camera.Constants.Type.back
+            );
+          }}
+        ></Button>
+        <Button title="Take Picture" onPress={() => takePicture()} />
+        <Button title="Pick Image" onPress={() => pickImage()} />
+        <Button
+          title="Save Image"
+          onPress={() => navigation.navigate("Save", { image })}
+        />
+        {image && <Image source={{ uri: image }} style={{ flex: 1 }} />}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  camera: {
+  cameraContainer: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
-    flexDirection: "row",
+    flexDirection: "column",
   },
   fixedRatio: {
     flex: 1,

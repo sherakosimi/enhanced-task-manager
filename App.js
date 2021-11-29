@@ -21,7 +21,8 @@ import ProfileDesign from "./components/main/ProfileDesign";
 import Tasks1 from "./components/main/Tasks1";
 import FriendsPage from "./components/main/Friends";
 import Projects from "./components/main/Projects";
-
+import CreateTask from "./components/main/createTask";
+import CommentScreen from "./components/main/Comment";
 import ProfileScreen from "./components/main/Profile";
 const store = createStore(rootReducers, applyMiddleware(thunk));
 
@@ -143,6 +144,16 @@ export class App extends Component {
               name="Profile Page"
               options={{ headerShown: false }}
               component={ProfilePageScreen}
+            />
+            <Stack.Screen
+              name="Comment"
+              options={{ headerShown: false }}
+              component={CommentScreen}
+            />
+            <Stack.Screen
+              name="CreateTask"
+              options={{ headerShown: false }}
+              component={CreateTask}
             />
           </Stack.Navigator>
         </NavigationContainer>

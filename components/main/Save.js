@@ -8,11 +8,27 @@ require("firebase/firebase-storage");
 export default function Save(props) {
   console.log(props.route.params.image);
   const [caption, setCaption] = useState("");
+
   const uploadImage = async () => {
+    let imageRef = firebase
+      .storage()
+      .ref(
+        "profilepicture/" +
+          firebase.auth().currentUser.uid +
+          "/" +
+          "profilePicture"
+      );
+    imageRef
+      .delete()
+      .then(() => {
+        console.log(`profilePicture has been deleted successfully.`);
+      })
+      .catch((e) => console.log("error on image deletion => ", e));
+
     const uri = props.route.params.image;
     const childPath = `profilepicture/${
       firebase.auth().currentUser.uid
-    }/${Math.random().toString(36)}`;
+    }/profilePicture`;
 
     const response = await fetch(uri);
     const blob = await response.blob();
@@ -40,14 +56,16 @@ export default function Save(props) {
       .firestore()
       .collection("posts")
       .doc(firebase.auth().currentUser.uid)
-      .collection("userPosts")
+      .collection("ProfilePicture")
       .add({
         downloadURL,
         caption,
         creation: firebase.firestore.FieldValue.serverTimestamp(),
       })
       .then(function () {
-        props.navigation.popToTop();
+        props.navigation.navigate("Profile Page", {
+          uid: firebase.auth().currentUser.uid,
+        });
       });
   };
 

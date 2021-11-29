@@ -18,16 +18,7 @@ import {
   Rubik_500Medium,
   Rubik_700Bold,
 } from "@expo-google-fonts/rubik";
-import {
-  Avatar,
-  Title,
-  Caption,
-  Paragraph,
-  Drawer,
-  Text,
-  TouchableRipple,
-  Switch,
-} from "react-native-paper";
+import { Text } from "react-native-paper";
 import { connect } from "react-redux";
 
 function Friends(props) {
@@ -90,6 +81,16 @@ function Friends(props) {
     }
   }, [props.route.params.uid, props.following]);
 
+  const onUnfollow = (id) => {
+    firebase
+      .firestore()
+      .collection("following")
+      .doc(firebase.auth().currentUser.uid)
+      .collection("userFollowing")
+      .doc(id)
+      .delete();
+  };
+
   console.log(firebase.auth().currentUser.uid);
   console.log(following);
   if (!fontsLoaded) {
@@ -140,8 +141,7 @@ function Friends(props) {
                     <Image
                       style={styles.image}
                       source={{
-                        uri:
-                          "https://www.meme-arsenal.com/memes/d701774e6840211ad6c99153e34481c6.jpg",
+                        uri: item.urlImage,
                       }}
                     />
                   </View>
@@ -149,8 +149,11 @@ function Friends(props) {
                     <Text style={styles.name}>{item.name}</Text>
                     <Text style={styles.username}>{item.username}</Text>
                   </View>
-                  <TouchableOpacity style={{ marginLeft: "35%" }}>
-                    <Icon name="forum" color="#1F4E5F" size={24} />
+                  <TouchableOpacity
+                    onPress={() => onUnfollow(item.id)}
+                    style={{ marginLeft: "5%" }}
+                  >
+                    <Icon name="delete-outline" color="#1F4E5F" size={24} />
                   </TouchableOpacity>
                 </TouchableOpacity>
               )}
@@ -210,14 +213,6 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
   },
-  friendBox: {
-    backgroundColor: "white",
-    height: 72,
-    borderRadius: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-start",
-  },
   friendBox2: {
     backgroundColor: "white",
     height: 72,
@@ -246,6 +241,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginLeft: 20,
     flexDirection: "column",
+    width: "55%",
   },
   name: {
     color: "#1F4E5F",

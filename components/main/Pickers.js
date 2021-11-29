@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,10 +7,12 @@ import {
   Dimensions,
   ScrollView,
 } from "react-native";
-
-const OPTIONS = ["Красный", "blue", "yellow", "green", "orange"];
+import firebase from "firebase";
+require("firebase/firestore");
+require("firebase/firebase-storage");
+const OPTIONS = ["DCity", "DC Сухурта", "Личное", "Deco", "Shohona"];
 const OPTIONS1 = ["sgsd", "sgdsgs", "yelldsgsdow", "gggg", "gggg"];
-const OPTIONS2 = ["asd", "asdasd", "asdasdasdsa", "asdasd", "asdasd"];
+const OPTIONS2 = ["Обычное", "Среднее", "Важное", "Суперважное"];
 const WIDTH = Dimensions.get("window").width;
 const HEIGHT = Dimensions.get("window").height;
 
@@ -52,19 +54,41 @@ const TaskType = (props) => {
 };
 
 const People = (props) => {
-  const onPressItem = (option) => {
+  const [following, setFollowing] = useState([]);
+
+  useEffect(() => {
+    const { following } = props;
+    console.log(firebase.auth().currentUser.uid);
+    firebase
+      .firestore()
+      .collection("following")
+      .doc(firebase.auth().currentUser.uid)
+      .collection("userFollowing")
+      .get()
+      .then((snapshot) => {
+        let following = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          const id = doc.id;
+          return { id, ...data };
+        });
+        setFollowing(following);
+      });
+  }, [props.following]);
+
+  console.log(following);
+  const onPressItem = (name, username, id) => {
     props.changeModalVisibility1(false);
-    props.setData1(option);
+    props.setData1(name, username, id);
   };
 
-  const option = OPTIONS1.map((item, index) => {
+  const option = following.map((item, index) => {
     return (
       <TouchableOpacity
         style={styles.option}
         key={index}
-        onPress={() => onPressItem(item)}
+        onPress={() => onPressItem(item.name, item.username, item.id)}
       >
-        <Text style={styles.text}>{item} </Text>
+        <Text style={styles.text}>{item.name} </Text>
       </TouchableOpacity>
     );
   });
@@ -138,7 +162,7 @@ const styles = StyleSheet.create({
   },
   text: {
     margin: 20,
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#1F4E5F",
   },

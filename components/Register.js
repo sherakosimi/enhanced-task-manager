@@ -9,6 +9,8 @@ import {
   TextInput,
 } from "react-native";
 import firebase from "firebase";
+require("firebase/firestore");
+require("firebase/firebase-storage");
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import {

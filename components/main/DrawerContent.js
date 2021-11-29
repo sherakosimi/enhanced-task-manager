@@ -1,7 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import firebase from "firebase";
+require("firebase/firestore");
+require("firebase/firebase-storage");
 import { connect } from "react-redux";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Image,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { LinearGradient } from "expo-linear-gradient";
@@ -11,20 +19,13 @@ import {
   Rubik_500Medium,
   Rubik_700Bold,
 } from "@expo-google-fonts/rubik";
-import {
-  Avatar,
-  Title,
-  Caption,
-  Paragraph,
-  Drawer,
-  Text,
-  TouchableRipple,
-  Switch,
-} from "react-native-paper";
+import { Avatar, Title, Caption, Drawer, Text } from "react-native-paper";
 
 export function DrawerContent(props) {
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
+  const [imageName, setImageName] = useState("");
 
   useEffect(() => {
     firebase
@@ -40,7 +41,37 @@ export function DrawerContent(props) {
           console.log("does not exist");
         }
       });
-  });
+
+    let imageRef = firebase
+      .storage()
+      .ref(
+        "profilepicture/" +
+          firebase.auth().currentUser.uid +
+          "/" +
+          "profilePicture"
+      );
+    imageRef
+      .getDownloadURL()
+      .then((url) => {
+        //from url you can fetched the uploaded image easily
+        callback(url);
+      })
+      .catch((e) => console.log("getting downloadURL of image error => ", e));
+    console.log("infinite");
+  }, []);
+
+  const callback = useCallback(
+    (url) => {
+      setImageName({ profileImageUrl: url });
+      console.log("callback");
+    },
+    [imageName]
+  );
+
+  function onLoading(value, label) {
+    setLoading(value);
+  }
+
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
     Rubik_500Medium,
@@ -50,7 +81,6 @@ export function DrawerContent(props) {
   const onLogout = () => {
     firebase.auth().signOut();
   };
-
   if (!fontsLoaded) {
     return <View></View>;
   } else {
@@ -85,13 +115,39 @@ export function DrawerContent(props) {
                       backgroundColor: "#1F4E5F",
                     }}
                   >
-                    <Avatar.Image
-                      source={{
-                        uri:
-                          "https://www.meme-arsenal.com/memes/d701774e6840211ad6c99153e34481c6.jpg",
-                      }}
-                      size={55}
-                    />
+                    {loading && (
+                      <View
+                        style={{
+                          justifyContent: "center",
+                          alignItems: "center",
+                          width: 50,
+                          zIndex: 0,
+                          alignContent: "center",
+                          position: "absolute",
+                          backgroundColor: "white",
+                          width: 55,
+                          height: 55,
+                          borderRadius: 100,
+                        }}
+                      >
+                        <ActivityIndicator color="#1F4E5F" />
+                      </View>
+                    )}
+                    {
+                      <Image
+                        onLoadStart={() => onLoading(true, "onLoadStart")}
+                        onLoadEnd={() => onLoading(false, "onLoadStart")}
+                        source={{
+                          uri: imageName.profileImageUrl,
+                        }}
+                        style={{
+                          width: 55,
+                          height: 55,
+                          borderRadius: 100,
+                          zIndex: 0,
+                        }}
+                      />
+                    }
                   </View>
                   <View style={{ marginLeft: 15, flexDirection: "column" }}>
                     <Title style={styles.title}>{name} </Title>
@@ -116,7 +172,9 @@ export function DrawerContent(props) {
                     <Text style={styles.labelCaption}>Задачи</Text>
                   )}
                   onPress={() => {
-                    props.navigation.navigate("Profile");
+                    props.navigation.navigate("Tasks1", {
+                      uid: firebase.auth().currentUser.uid,
+                    });
                   }}
                 />
                 <DrawerItem
@@ -127,7 +185,9 @@ export function DrawerContent(props) {
                     <Text style={styles.labelCaption}>Сообщения</Text>
                   )}
                   onPress={() => {
-                    props.navigation.navigate("Tasks");
+                    props.navigation.navigate("Tasks1", {
+                      uid: firebase.auth().currentUser.uid,
+                    });
                   }}
                 />
                 <DrawerItem
@@ -190,7 +250,9 @@ export function DrawerContent(props) {
                   label={({ color, size }) => (
                     <Text style={styles.sublabelCaption}>Проекты</Text>
                   )}
-                  onPress={() => {}}
+                  onPress={() => {
+                    props.navigation.navigate("Projects");
+                  }}
                 />
               </View>
               <DrawerItem
@@ -232,7 +294,9 @@ export function DrawerContent(props) {
                   label={({ color, size }) => (
                     <Text style={styles.sublabelCaption}>Проекты</Text>
                   )}
-                  onPress={() => {}}
+                  onPress={() => {
+                    props.navigation.navigate("Projects");
+                  }}
                 />
               </View>
             </Drawer.Section>
