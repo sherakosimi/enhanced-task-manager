@@ -7,6 +7,7 @@ import {
   fetchUserPosts,
   fetchUserFollowing,
   clearData,
+  fetchUserProjects,
 } from "../redux/actions/index";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import ProfileScreen from "./main/Profile";
@@ -33,6 +34,7 @@ export class Main extends Component {
     this.props.fetchUser();
     this.props.fetchUserPosts();
     this.props.fetchUserFollowing();
+    this.props.fetchUserProjects();
   }
   render() {
     //const { currentUser } = this.props;
@@ -51,7 +53,7 @@ export class Main extends Component {
       >
         <Drawer.Screen
           name="Calendar"
-          component={CommentsTest}
+          component={createProject}
           options={{
             headerShown: false,
           }}
@@ -59,7 +61,7 @@ export class Main extends Component {
         />
         <Drawer.Screen
           name="Tasks1"
-          component={CommentsTest}
+          component={Tasks1}
           options={{
             headerShown: false,
           }}
@@ -109,7 +111,13 @@ const mapStateToProps = (store) => ({
 
 const mapDispatchProps = (dispatch) =>
   bindActionCreators(
-    { fetchUser, fetchUserPosts, fetchUserFollowing, clearData },
+    {
+      fetchUser,
+      fetchUserPosts,
+      fetchUserFollowing,
+      clearData,
+      fetchUserProjects,
+    },
     dispatch
   );
 

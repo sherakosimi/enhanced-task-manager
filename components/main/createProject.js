@@ -8,6 +8,7 @@ import {
   FlatList,
   ScrollView,
   Modal,
+  KeyboardAvoidingView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -46,32 +47,42 @@ export default function createProject(props) {
   const [importantLevel, setchooseData2] = useState("Выбрать...");
   const [isModalVisible2, setisModalVisible2] = useState(false);
 
+  const generateColor = () => {
+    const randomColor = Math.floor(Math.random() * 16777215)
+      .toString(16)
+      .padStart(6, "0");
+    return `#${randomColor}`;
+  };
+
   const savePostData = () => {
     for (let i = 0; i < participants.length; i++) {
       firebase
         .firestore()
-        .collection("posts")
-        .doc(participants[i].id)
-        .collection("userPosts")
-        .add({
-          taskType,
-          caption,
-          participants,
-          description,
-          date,
-          time,
-          importantLevel,
-          creation: firebase.firestore.FieldValue.serverTimestamp(),
+        .collection("ProjectUsers")
+        .doc(participants[i].id + "_" + projectID)
+        .set({
+          userID: participants[i].id,
+          projectID: projectID,
+          inProject: true,
         });
     }
 
     firebase
       .firestore()
-      .collection("posts")
-      .doc(firebase.auth().currentUser.uid)
+      .collection("ProjectUsers")
+      .doc(firebase.auth().currentUser.uid + "_" + projectID)
+      .set({
+        userID: firebase.auth().currentUser.uid,
+        projectID: projectID,
+        inProject: true,
+      });
+
+    firebase
+      .firestore()
       .collection("projects")
       .doc(projectID)
-      .add({
+      .set({
+        creator: firebase.auth().currentUser.uid,
         projectID,
         caption,
         participants,
@@ -79,6 +90,7 @@ export default function createProject(props) {
         date,
         time,
         importantLevel,
+        color: generateColor(),
         creation: firebase.firestore.FieldValue.serverTimestamp(),
       })
       .then(function () {
@@ -170,7 +182,7 @@ export default function createProject(props) {
     return <View></View>;
   } else {
     return (
-      <View style={styles.container}>
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
         <LinearGradient
           style={{ height: "100%" }}
           colors={[
@@ -184,7 +196,7 @@ export default function createProject(props) {
               <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
                 <Icon name="menu" color="#1F4E5F" size={30} />
               </TouchableOpacity>
-              <Text style={styles.headerText}>Друзья</Text>
+              <Text style={styles.headerText}>Создание Проекта</Text>
               <Icon name="account-plus-outline" color="transparent" size={30} />
             </View>
           </View>
@@ -398,7 +410,7 @@ export default function createProject(props) {
             </TouchableOpacity>
           </View>
         </LinearGradient>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }

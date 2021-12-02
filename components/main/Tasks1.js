@@ -33,6 +33,7 @@ import { connect } from "react-redux";
 function Tasks1(props) {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [postTest, setPostTest] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
   let [fontsLoaded] = useFonts({
@@ -49,28 +50,15 @@ function Tasks1(props) {
       props.feed.sort(function (x, y) {
         return x.creation - y.creation;
       });
+      console.log(props.feed);
       setPosts(props.feed);
     }
+    console.log(props.following);
 
     setRefreshing(false);
   }, [props.usersFollowingLoaded, props.feed]);
 
   const makeRemoteRequest = () => {
-    firebase
-      .firestore()
-      .collection("posts")
-      .doc(firebase.auth().currentUser.uid)
-      .collection("userPosts")
-      .orderBy("creation", "asc")
-      .get()
-      .then((snapshot) => {
-        let posts = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          const id = doc.id;
-          return { id, ...data };
-        });
-        setPosts(posts);
-      });
     setRefreshing(false);
   };
 
@@ -78,8 +66,7 @@ function Tasks1(props) {
     setRefreshing(true);
     makeRemoteRequest();
   };
-
-  console.log(posts);
+  console.log();
   if (!fontsLoaded) {
     return <View></View>;
   } else {
@@ -181,7 +168,7 @@ function Tasks1(props) {
                   onPress={() =>
                     props.navigation.navigate("Comment", {
                       postId: item.id,
-                      uid: item.user.uid,
+                      uid: item.user.id,
                       participants: item.participants,
                       caption: item.caption,
                       description: item.description,

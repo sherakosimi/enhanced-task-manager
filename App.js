@@ -22,8 +22,9 @@ import Tasks1 from "./components/main/Tasks1";
 import FriendsPage from "./components/main/Friends";
 import Projects from "./components/main/Projects";
 import CreateTask from "./components/main/createTask";
-import CommentScreen from "./components/main/Comment";
+import CommentScreen from "./components/main/commentTest";
 import ProfileScreen from "./components/main/Profile";
+
 const store = createStore(rootReducers, applyMiddleware(thunk));
 
 const firebaseConfig = {

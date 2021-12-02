@@ -9,6 +9,7 @@ import {
   FlatList,
   ScrollView,
   Modal,
+  KeyboardAvoidingView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -154,7 +155,7 @@ export default function createTask(props) {
     return <View></View>;
   } else {
     return (
-      <View style={styles.container}>
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
         <LinearGradient
           style={{ height: "100%" }}
           colors={[
@@ -394,7 +395,7 @@ export default function createTask(props) {
             </TouchableOpacity>
           </View>
         </LinearGradient>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }

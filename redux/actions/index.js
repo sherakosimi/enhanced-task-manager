@@ -4,6 +4,7 @@ import {
   USER_FOLLOWING_STATE_CHANGE,
   USERS_DATA_STATE_CHANGE,
   USERS_POSTS_STATE_CHANGE,
+  USER_PROJECTS_STATE_CHANGE,
   USERS_LIKES_STATE_CHANGE,
   CLEAR_DATA,
 } from "../constants/index";
@@ -50,6 +51,25 @@ export function fetchUserPosts() {
           return { id, ...data };
         });
         dispatch({ type: USER_POSTS_STATE_CHANGE, posts });
+      });
+  };
+}
+
+export function fetchUserProjects() {
+  return (dispatch) => {
+    firebase
+      .firestore()
+      .collection("projects")
+      .orderBy("creation", "asc")
+      .get()
+      .then((snapshot) => {
+        let projects = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          const id = doc.id;
+          console.log(data);
+          return { id, ...data };
+        });
+        dispatch({ type: USER_PROJECTS_STATE_CHANGE, projects });
       });
   };
 }
@@ -102,6 +122,7 @@ export function fetchUsersData(uid, getPosts) {
 
 export function fetchUsersFollowingPosts(uid) {
   return (dispatch, getState) => {
+    console.log(uid);
     firebase
       .firestore()
       .collection("posts")

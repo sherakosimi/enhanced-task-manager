@@ -251,7 +251,9 @@ export function DrawerContent(props) {
                     <Text style={styles.sublabelCaption}>Проекты</Text>
                   )}
                   onPress={() => {
-                    props.navigation.navigate("Projects");
+                    props.navigation.navigate("Projects", {
+                      uid: firebase.auth().currentUser.uid,
+                    });
                   }}
                 />
               </View>
@@ -295,7 +297,9 @@ export function DrawerContent(props) {
                     <Text style={styles.sublabelCaption}>Проекты</Text>
                   )}
                   onPress={() => {
-                    props.navigation.navigate("Projects");
+                    props.navigation.navigate("Projects", {
+                      uid: firebase.auth().currentUser.uid,
+                    });
                   }}
                 />
               </View>
