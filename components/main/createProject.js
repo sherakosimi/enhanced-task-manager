@@ -25,8 +25,9 @@ import moment from "moment";
 import firebase from "firebase";
 require("firebase/firestore");
 require("firebase/firebase-storage");
+import { connect } from "react-redux";
 
-export default function createProject(props) {
+function createProject(props) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [date, setDate] = useState(moment().format("DD.MM.YYYY"));
@@ -61,6 +62,7 @@ export default function createProject(props) {
         .collection("ProjectUsers")
         .doc(participants[i].id + "_" + projectID)
         .set({
+          creator: firebase.auth().currentUser.uid,
           userID: participants[i].id,
           projectID: projectID,
           inProject: true,
@@ -72,6 +74,7 @@ export default function createProject(props) {
       .collection("ProjectUsers")
       .doc(firebase.auth().currentUser.uid + "_" + projectID)
       .set({
+        creator: firebase.auth().currentUser.uid,
         userID: firebase.auth().currentUser.uid,
         projectID: projectID,
         inProject: true,
@@ -92,6 +95,7 @@ export default function createProject(props) {
         importantLevel,
         color: generateColor(),
         creation: firebase.firestore.FieldValue.serverTimestamp(),
+        user: props.currentUser,
       })
       .then(function () {
         props.navigation.navigate("Projects");
@@ -178,6 +182,7 @@ export default function createProject(props) {
     Rubik_700Bold,
   });
 
+  console.log(props.currentUser);
   if (!fontsLoaded) {
     return <View></View>;
   } else {
@@ -558,3 +563,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
 });
+const mapStateToProps = (store) => ({
+  currentUser: store.userState.currentUser,
+});
+export default connect(mapStateToProps, null)(createProject);

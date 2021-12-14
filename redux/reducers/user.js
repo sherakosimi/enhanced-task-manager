@@ -23,12 +23,12 @@ export const user = (state = initialState, action) => {
     case USER_POSTS_STATE_CHANGE:
       return {
         ...state,
-        posts: action.posts,
+        posts: [...action.posts],
       };
     case USER_PROJECTS_STATE_CHANGE:
       return {
         ...state,
-        projects: action.projects,
+        projects: [...action.projects],
       };
     case USER_FOLLOWING_STATE_CHANGE:
       return {

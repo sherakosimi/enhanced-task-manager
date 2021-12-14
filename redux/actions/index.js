@@ -35,7 +35,7 @@ export function fetchUser() {
 }
 
 export function fetchUserPosts() {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     firebase
       .firestore()
       .collection("posts")
@@ -44,11 +44,13 @@ export function fetchUserPosts() {
       .orderBy("creation", "asc")
       .get()
       .then((snapshot) => {
+        const uid = snapshot.query._.C_.path.segments[1];
+        const user = getState().userState.currentUser;
+
         let posts = snapshot.docs.map((doc) => {
           const data = doc.data();
           const id = doc.id;
-          console.log(data);
-          return { id, ...data };
+          return { id, ...data, user };
         });
         dispatch({ type: USER_POSTS_STATE_CHANGE, posts });
       });
@@ -56,7 +58,7 @@ export function fetchUserPosts() {
 }
 
 export function fetchUserProjects() {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     firebase
       .firestore()
       .collection("projects")
@@ -66,7 +68,6 @@ export function fetchUserProjects() {
         let projects = snapshot.docs.map((doc) => {
           const data = doc.data();
           const id = doc.id;
-          console.log(data);
           return { id, ...data };
         });
         dispatch({ type: USER_PROJECTS_STATE_CHANGE, projects });
@@ -88,6 +89,7 @@ export function fetchUserFollowing() {
         });
         dispatch({ type: USER_FOLLOWING_STATE_CHANGE, following });
         for (let i = 0; i < following.length; i++) {
+          console.log(following[i]);
           dispatch(fetchUsersData(following[i], true));
         }
       });
@@ -97,6 +99,7 @@ export function fetchUserFollowing() {
 export function fetchUsersData(uid, getPosts) {
   return (dispatch, getState) => {
     const found = getState().usersState.users.some((el) => el.uid === uid);
+    console.log(found);
     if (!found) {
       firebase
         .firestore()
@@ -106,14 +109,15 @@ export function fetchUsersData(uid, getPosts) {
         .then((snapshot) => {
           if (snapshot.exists) {
             let user = snapshot.data();
+            console.log(snapshot.id);
             user.uid = snapshot.id;
-
             dispatch({ type: USERS_DATA_STATE_CHANGE, user });
           } else {
             console.log("does not exist");
           }
         });
       if (getPosts) {
+        console.log(uid);
         dispatch(fetchUsersFollowingPosts(uid));
       }
     }
@@ -122,7 +126,7 @@ export function fetchUsersData(uid, getPosts) {
 
 export function fetchUsersFollowingPosts(uid) {
   return (dispatch, getState) => {
-    console.log(uid);
+    console.log("sssss");
     firebase
       .firestore()
       .collection("posts")
@@ -133,13 +137,11 @@ export function fetchUsersFollowingPosts(uid) {
       .then((snapshot) => {
         const uid = snapshot.query._.C_.path.segments[1];
         const user = getState().usersState.users.find((el) => el.uid === uid);
-
         let posts = snapshot.docs.map((doc) => {
           const data = doc.data();
           const id = doc.id;
-          return { id, ...data, user };
+          return { id, ...data };
         });
-
         for (let i = 0; i < posts.length; i++) {
           dispatch(fetchUsersFollowingLikes(uid, posts[i].id));
         }

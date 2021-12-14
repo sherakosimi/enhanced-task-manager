@@ -26,6 +26,7 @@ import { relativeTimeThreshold } from "moment";
 import SaveScreen from "./main/Save";
 import createProject from "./main/createProject";
 import CommentsTest from "./main/commentTest";
+import projectOverview from "./main/projectOverview";
 const Drawer = createDrawerNavigator();
 
 export class Main extends Component {
@@ -53,7 +54,15 @@ export class Main extends Component {
       >
         <Drawer.Screen
           name="Calendar"
-          component={createProject}
+          component={Tasks1}
+          options={{
+            headerShown: false,
+          }}
+          navigation={this.props.navigation}
+        />
+        <Drawer.Screen
+          name="projectOverview"
+          component={projectOverview}
           options={{
             headerShown: false,
           }}
@@ -96,6 +105,13 @@ export class Main extends Component {
         <Drawer.Screen
           name="ProfilePage"
           component={ProfilePage}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Drawer.Screen
+          name="createProject"
+          component={createProject}
           options={{
             headerShown: false,
           }}

@@ -19,6 +19,7 @@ import {
   Rubik_500Medium,
   Rubik_700Bold,
 } from "@expo-google-fonts/rubik";
+import { connect } from "react-redux";
 import { Text } from "react-native-paper";
 import { TaskType, People, ImpLevel } from "./Pickers";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -27,20 +28,18 @@ import firebase from "firebase";
 require("firebase/firestore");
 require("firebase/firebase-storage");
 
-export default function createTask(props) {
+function createTask(props) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [date, setDate] = useState(moment().format("DD.MM.YYYY"));
   const [time, setTime] = useState(moment().format("HH:mm"));
-
   const [participants, setFollowing] = useState([]);
-
   const [imgUrl, setImgUrl] = useState("");
-
+  const [projectID, setProjectID] = useState("");
   const [caption, setCaption] = useState("");
   const [description, setDescription] = useState("");
-
-  const [taskType, setchooseData] = useState("Выбрать...");
+  const [postID, setPostID] = useState("");
+  const [taskType, setchooseData] = useState("Личное");
   const [isModalVisible, setisModalVisible] = useState(false);
   const [chooseData1, setchooseData1] = useState("Выбрать...");
   const [isModalVisible1, setisModalVisible1] = useState(false);
@@ -48,13 +47,25 @@ export default function createTask(props) {
   const [isModalVisible2, setisModalVisible2] = useState(false);
 
   const savePostData = () => {
+    setFollowing([
+      ...participants,
+      {
+        name: props.currentUser.name,
+        username: props.currentUser.username,
+        id: props.currentUser.id,
+        url: props.currentUser.url,
+      },
+    ]);
+
     firebase
       .firestore()
       .collection("posts")
       .doc(firebase.auth().currentUser.uid)
       .collection("userPosts")
-      .add({
+      .doc(postID)
+      .set({
         creator: firebase.auth().currentUser.uid,
+        id: postID,
         taskType,
         caption,
         participants,
@@ -62,12 +73,24 @@ export default function createTask(props) {
         date,
         time,
         importantLevel,
+        user: props.currentUser,
         creation: firebase.firestore.FieldValue.serverTimestamp(),
       })
       .then(function () {
         props.navigation.navigate("Tasks1", {
           uid: firebase.auth().currentUser.uid,
         });
+      });
+
+    firebase
+      .firestore()
+      .collection("ProjectPosts")
+      .doc(postID + "_" + projectID)
+      .set({
+        postID: postID,
+        projectID: projectID,
+        inProject: true,
+        creator: firebase.auth().currentUser.uid,
       });
   };
 
@@ -103,34 +126,38 @@ export default function createTask(props) {
     setisModalVisible(bool);
   };
 
-  const setData = (option) => {
+  const setData = (option, id) => {
     setchooseData(option);
+    setProjectID(id);
+
+    var s5 = Math.random()
+      .toString(36)
+      .replace(/[^a-z]+/g, "")
+      .substr(2, 10);
+    setPostID(s5);
   };
 
   const changeModalVisibility1 = (bool) => {
     setisModalVisible1(bool);
   };
 
-  const setData1 = (name, username, id) => {
-    let imageRef = firebase
-      .storage()
-      .ref("profilepicture/" + id + "/" + "profilePicture");
-    imageRef
-      .getDownloadURL()
-      .then((url) => {
-        console.log(url);
-        //from url you can fetched the uploaded image easily
-        setImgUrl(url);
-      })
-      .catch((e) => console.log("getting downloadURL of image error => ", e));
-
-    const data = {
-      name: name,
-      username: username,
-      id: id,
-      url: imgUrl,
-    };
-    setFollowing([...participants, data]);
+  const setData1 = (name, username, userID) => {
+    const ref = firebase.firestore().collection("users");
+    ref
+      .where("id", "==", userID)
+      .get()
+      .then((snapshot) => {
+        let users = snapshot.docs.map((doc) => {
+          console.log(doc.data().url);
+          const data = {
+            name: name,
+            username: username,
+            id: userID,
+            url: doc.data().url,
+          };
+          setFollowing([...participants, data]);
+        });
+      });
   };
 
   const deleteData = (username) => {
@@ -151,6 +178,8 @@ export default function createTask(props) {
     Rubik_700Bold,
   });
 
+  console.log(projectID);
+  console.log(postID);
   if (!fontsLoaded) {
     return <View></View>;
   } else {
@@ -542,3 +571,8 @@ const styles = StyleSheet.create({
     color: "white",
   },
 });
+const mapStateToProps = (store) => ({
+  currentUser: store.userState.currentUser,
+});
+
+export default connect(mapStateToProps)(createTask);

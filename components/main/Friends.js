@@ -18,9 +18,12 @@ import {
   Rubik_500Medium,
   Rubik_700Bold,
 } from "@expo-google-fonts/rubik";
+import { bindActionCreators } from "redux";
+import { fetchUserFollowing } from "../../redux/actions/index";
 import { Text } from "react-native-paper";
 import { connect } from "react-redux";
-
+import { set } from "react-native-reanimated";
+var _ = require("lodash");
 function Friends(props) {
   const [user, setUser] = useState(null);
   const [following, setFollowing] = useState([]);
@@ -45,11 +48,8 @@ function Friends(props) {
         .get()
         .then((snapshot) => {
           let following = snapshot.docs.map((doc) => {
-            const data = doc.data();
-            const id = doc.id;
-            return { id, ...data };
+            Load(doc.data().id);
           });
-          setFollowing(following);
         });
     } else {
       firebase
@@ -72,16 +72,28 @@ function Friends(props) {
         .get()
         .then((snapshot) => {
           let following = snapshot.docs.map((doc) => {
-            const data = doc.data();
-            const id = doc.id;
-            return { id, ...data };
+            Load(doc.data().id);
           });
-          setFollowing(following);
         });
     }
   }, [props.route.params.uid, props.following]);
 
+  async function Load(userID) {
+    const ref = firebase.firestore().collection("users");
+    ref
+      .where("id", "==", userID)
+      .get()
+      .then((snapshot) => {
+        let users = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          const id = doc.id;
+          setFollowing((following) => [...following, data]);
+        });
+      });
+  }
+
   const onUnfollow = (id) => {
+    setFollowing(following.filter((item) => item.id !== id));
     firebase
       .firestore()
       .collection("following")
@@ -89,17 +101,28 @@ function Friends(props) {
       .collection("userFollowing")
       .doc(id)
       .delete();
+
+    firebase
+      .firestore()
+      .collection("following")
+      .doc(id)
+      .collection("userFollowing")
+      .doc(firebase.auth().currentUser.uid)
+      .delete();
+    props.fetchUserFollowing();
   };
 
   console.log(firebase.auth().currentUser.uid);
   console.log(following);
+  console.log(props.following);
+
   if (!fontsLoaded) {
     return <View></View>;
   } else {
     return (
       <View style={styles.container}>
         <LinearGradient
-          style={{ height: "100%" }}
+          style={{ height: "100%", flex: 1 }}
           colors={[
             "#C2F1FA",
             "rgba(217, 242, 255, 0.53125)",
@@ -134,16 +157,33 @@ function Friends(props) {
             <FlatList
               numColumns={1}
               horizontal={false}
-              data={following}
+              data={_.uniqBy(following, "id")}
               renderItem={({ item }) => (
-                <TouchableOpacity style={styles.friendBox2}>
+                <TouchableOpacity
+                  style={styles.friendBox2}
+                  onPress={() =>
+                    props.navigation.navigate("Profile Page", {
+                      uid: item.id,
+                    })
+                  }
+                >
                   <View style={styles.imageContainer}>
-                    <Image
-                      style={styles.image}
-                      source={{
-                        uri: item.urlImage,
-                      }}
-                    />
+                    {item.urlImage == "" ? (
+                      <Image
+                        style={styles.image}
+                        source={{
+                          uri:
+                            "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-social-media-user-vector-image-icon-default-avatar-profile-icon-social-media-user-vector-image-209162840.jpg",
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        style={styles.image}
+                        source={{
+                          uri: item.url,
+                        }}
+                      />
+                    )}
                   </View>
                   <View style={styles.userInfo}>
                     <Text style={styles.name}>{item.name}</Text>
@@ -212,6 +252,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     width: "90%",
     alignSelf: "center",
+    flex: 1,
   },
   friendBox2: {
     backgroundColor: "white",
@@ -255,9 +296,17 @@ const styles = StyleSheet.create({
   },
 });
 
+const mapDispatchProps = (dispatch) =>
+  bindActionCreators(
+    {
+      fetchUserFollowing,
+    },
+    dispatch
+  );
+
 const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
   posts: store.userState.posts,
   following: store.userState.following,
 });
-export default connect(mapStateToProps, null)(Friends);
+export default connect(mapStateToProps, mapDispatchProps)(Friends);

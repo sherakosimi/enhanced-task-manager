@@ -11,6 +11,14 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import firebase from "firebase";
+import { bindActionCreators } from "redux";
+import {
+  fetchUsersData,
+  fetchUserPosts,
+  fetchUserFollowing,
+  fetchUsersFollowingPosts,
+  clearData,
+} from "../../redux/actions/index";
 import {
   useFonts,
   Rubik_400Regular,
@@ -35,7 +43,7 @@ function Tasks1(props) {
   const [posts, setPosts] = useState([]);
   const [postTest, setPostTest] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-
+  var _ = require("lodash");
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
     Rubik_500Medium,
@@ -43,6 +51,13 @@ function Tasks1(props) {
   });
 
   useEffect(() => {
+    setPosts([]);
+    console.log(props.feed.length);
+    load();
+    setRefreshing(false);
+  }, [props.usersFollowingLoaded, props.feed]);
+
+  async function load() {
     if (
       props.usersFollowingLoaded == props.following.length &&
       props.following.length !== 0
@@ -50,15 +65,25 @@ function Tasks1(props) {
       props.feed.sort(function (x, y) {
         return x.creation - y.creation;
       });
-      console.log(props.feed);
-      setPosts(props.feed);
+
+      for (let i = 0; i < props.feed.length; i++) {
+        for (let f = 0; f < props.feed[i].participants.length; f++) {
+          if (
+            firebase.auth().currentUser.uid == props.feed[i].participants[f].id
+          )
+            setPosts((posts) => [...posts, props.feed[i]]);
+        }
+      }
+
+      for (let i = 0; i < props.posts.length; i++) {
+        setPosts((posts) => [...posts, props.posts[i]]);
+      }
     }
-    console.log(props.following);
-
-    setRefreshing(false);
-  }, [props.usersFollowingLoaded, props.feed]);
-
+  }
   const makeRemoteRequest = () => {
+    props.clearData();
+    props.fetchUserPosts();
+    props.fetchUserFollowing();
     setRefreshing(false);
   };
 
@@ -66,7 +91,7 @@ function Tasks1(props) {
     setRefreshing(true);
     makeRemoteRequest();
   };
-  console.log();
+  console.log(posts);
   if (!fontsLoaded) {
     return <View></View>;
   } else {
@@ -138,7 +163,7 @@ function Tasks1(props) {
         <View style={styles.lowerHeader}>
           <Text style={styles.listCaption}>Лист Задач</Text>
           <View style={styles.sortIcons}>
-            <TouchableOpacity style={styles.icon}>
+            <TouchableOpacity style={styles.icon} onPress={handleRefresh}>
               <Icon name="sort" color="white" size={23} />
             </TouchableOpacity>
             <TouchableOpacity
@@ -156,7 +181,7 @@ function Tasks1(props) {
             horizontal={false}
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            data={posts}
+            data={_.uniqBy(posts, "id")}
             renderItem={({ item }) => (
               <View style={styles.taskSection}>
                 <View style={styles.sideIcons}>
@@ -226,7 +251,7 @@ function Tasks1(props) {
                       {item.participants.length == 0 ? null : (
                         <View style={styles.personCircle}>
                           <Text style={styles.peopleMore}>
-                            +{item.participants.length}
+                            +{item.participants.length - 1}
                           </Text>
                         </View>
                       )}
@@ -560,6 +585,19 @@ const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
   following: store.userState.following,
   feed: store.usersState.feed,
+  posts: store.userState.posts,
   usersFollowingLoaded: store.usersState.usersFollowingLoaded,
 });
-export default connect(mapStateToProps, null)(Tasks1);
+const mapDispatchProps = (dispatch) =>
+  bindActionCreators(
+    {
+      clearData,
+      fetchUsersData,
+      fetchUserPosts,
+      fetchUserFollowing,
+      fetchUsersFollowingPosts,
+    },
+    dispatch
+  );
+
+export default connect(mapStateToProps, mapDispatchProps)(Tasks1);

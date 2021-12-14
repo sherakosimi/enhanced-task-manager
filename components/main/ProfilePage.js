@@ -36,7 +36,7 @@ function ProfilePage(props) {
   const [user, setUser] = useState(null);
   const [following, setFollowing] = useState(false);
   const [imageName, setImageName] = useState("");
-  const [imgUrl, setImgUrl] = useState("");
+
   let [fontsLoaded] = useFonts({
     Rubik_400Regular,
     Rubik_500Medium,
@@ -45,10 +45,10 @@ function ProfilePage(props) {
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     const { currentUser, posts } = props;
-
     console.log(firebase.auth().currentUser.uid);
     if (props.route.params.uid === firebase.auth().currentUser.uid) {
       setUser(currentUser);
+      setImageName(currentUser.url);
       setUserPosts(posts);
     } else {
       firebase
@@ -59,6 +59,7 @@ function ProfilePage(props) {
         .then((snapshot) => {
           if (snapshot.exists) {
             setUser(snapshot.data());
+            setImageName(snapshot.data().url);
           } else {
             console.log("does not exist");
           }
@@ -80,18 +81,6 @@ function ProfilePage(props) {
         });
     }
 
-    let imageRef = firebase
-      .storage()
-      .ref("profilepicture/" + props.route.params.uid + "/" + "profilePicture");
-    imageRef
-      .getDownloadURL()
-      .then((url) => {
-        //from url you can fetched the uploaded image easily
-        setImageName({ profileImageUrl: url });
-        console.log(url);
-      })
-      .catch((e) => console.log("getting downloadURL of image error => ", e));
-
     if (props.following.indexOf(props.route.params.uid) > -1) {
       setFollowing(true);
     } else {
@@ -100,44 +89,32 @@ function ProfilePage(props) {
   }, [props.route.params.uid, props.following]);
 
   const onFollow = () => {
-    let urlImage;
+    firebase
+      .firestore()
+      .collection("following")
+      .doc(firebase.auth().currentUser.uid)
+      .collection("userFollowing")
+      .doc(props.route.params.uid)
+      .set({
+        id: props.route.params.uid,
+        email: user.email,
+        name: user.name,
+        username: user.username,
+      });
 
-    let imageRef = firebase
-      .storage()
-      .ref("profilepicture/" + props.route.params.uid + "/" + "profilePicture");
-    imageRef
-      .getDownloadURL()
-      .then((url) => {
-        firebase
-          .firestore()
-          .collection("following")
-          .doc(firebase.auth().currentUser.uid)
-          .collection("userFollowing")
-          .doc(props.route.params.uid)
-          .set({
-            id: props.route.params.uid,
-            email: user.email,
-            name: user.name,
-            username: user.username,
-            urlImage: url,
-          });
-        //from url you can fetched the uploaded image easily
-      })
-      .catch(() =>
-        firebase
-          .firestore()
-          .collection("following")
-          .doc(firebase.auth().currentUser.uid)
-          .collection("userFollowing")
-          .doc(props.route.params.uid)
-          .set({
-            id: props.route.params.uid,
-            email: user.email,
-            name: user.name,
-            username: user.username,
-            urlImage: "",
-          })
-      );
+    firebase
+      .firestore()
+      .collection("following")
+      .doc(props.route.params.uid)
+      .collection("userFollowing")
+      .doc(firebase.auth().currentUser.uid)
+      .set({
+        id: firebase.auth().currentUser.uid,
+        email: props.currentUser.email,
+        name: props.currentUser.name,
+        username: props.currentUser.username,
+      });
+    //from url you can fetched the uploaded image easily
   };
 
   function onLoading(value, label) {
@@ -157,6 +134,7 @@ function ProfilePage(props) {
   const onLogout = () => {
     firebase.auth().signOut();
   };
+  console.log(imageName);
 
   if (user === null) {
     return <View />;
@@ -194,6 +172,7 @@ function ProfilePage(props) {
                   alignItems: "center",
                   backgroundColor: "#1F4E5F",
                 }}
+                onPress={() => props.navigation.navigate("Profile")}
               >
                 {loading && (
                   <View
@@ -215,10 +194,10 @@ function ProfilePage(props) {
                 )}
                 {
                   <Image
-                    onLoadStart={() => onLoading(true, "onLoadStart")}
-                    onLoadEnd={() => onLoading(false, "onLoadStart")}
+                    // onLoadStart={() => onLoading(true, "onLoadStart")}
+                    // onLoadEnd={() => onLoading(false, "onLoadStart")}
                     source={{
-                      uri: imageName.profileImageUrl,
+                      uri: imageName,
                     }}
                     style={{
                       width: 100,
@@ -229,7 +208,6 @@ function ProfilePage(props) {
                   />
                 }
               </TouchableOpacity>
-
               <View>
                 <Text style={styles.taskTitle}>24</Text>
                 <Text style={styles.taskCaption}>Текущих Задач</Text>
@@ -267,58 +245,8 @@ function ProfilePage(props) {
               )}
             </View>
           </View>
-          {/* 
-          <FlatList
-            numColumns={1}
-            horizontal={false}
-            data={userPosts}
-            renderItem={({ item }) => (
-              <View style={styles.posts}>
-                <Image
-                  style={{ width: "100%", height: 200 }}
-                  source={{
-                    uri: item.downloadURL,
-                  }}
-                />
-              </View>
-            )}
-          /> */}
         </LinearGradient>
       </View>
-      // <View style={styles.container}>
-      //   <View style={styles.containerInfo}>
-      //     <Text>{user.username}</Text>
-      //     <Text>{user.email}</Text>
-
-      //     {props.route.params.uid !== firebase.auth().currentUser.uid ? (
-      //       <View>
-      //         {following ? (
-      //           <Button title="Following" onPress={() => onUnfollow()} />
-      //         ) : (
-      //           <Button title="Follow" onPress={() => onFollow()} />
-      //         )}
-      //       </View>
-      //     ) : (
-      //       <Button title="Logout" onPress={() => onLogout()} />
-      //     )}
-      //   </View>
-
-      //   <View style={styles.containerGallery}>
-      //     <FlatList
-      //       numColumns={3}
-      //       horizontal={false}
-      //       data={userPosts}
-      //       renderItem={({ item }) => (
-      //         <View style={styles.containerImage}>
-      //           <Image
-      //             style={styles.image}
-      //             source={{ uri: item.downloadURL }}
-      //           />
-      //         </View>
-      //       )}
-      //     />
-      //   </View>
-      // </View>
     );
   }
 }

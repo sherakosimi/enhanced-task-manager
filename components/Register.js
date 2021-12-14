@@ -134,6 +134,9 @@ export default function Register({ navigation }) {
               username,
               email,
               password,
+              id: firebase.auth().currentUser.uid,
+              url:
+                "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-social-media-user-vector-image-icon-default-avatar-profile-icon-social-media-user-vector-image-209162840.jpg",
             });
           const user = firebase.auth().currentUser;
           user.updateProfile({

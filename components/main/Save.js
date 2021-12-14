@@ -54,18 +54,10 @@ export default function Save(props) {
   const savePostData = (downloadURL) => {
     firebase
       .firestore()
-      .collection("posts")
+      .collection("users")
       .doc(firebase.auth().currentUser.uid)
-      .collection("ProfilePicture")
-      .add({
-        downloadURL,
-        caption,
-        creation: firebase.firestore.FieldValue.serverTimestamp(),
-      })
-      .then(function () {
-        props.navigation.navigate("Profile Page", {
-          uid: firebase.auth().currentUser.uid,
-        });
+      .update({
+        url: downloadURL,
       });
   };
 

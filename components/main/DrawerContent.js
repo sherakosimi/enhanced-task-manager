@@ -35,38 +35,14 @@ export function DrawerContent(props) {
       .get()
       .then((snapshot) => {
         if (snapshot.exists) {
+          setImageName(snapshot.data().url);
           setName(snapshot.data().name);
           setUsername(snapshot.data().username);
         } else {
           console.log("does not exist");
         }
       });
-
-    let imageRef = firebase
-      .storage()
-      .ref(
-        "profilepicture/" +
-          firebase.auth().currentUser.uid +
-          "/" +
-          "profilePicture"
-      );
-    imageRef
-      .getDownloadURL()
-      .then((url) => {
-        //from url you can fetched the uploaded image easily
-        callback(url);
-      })
-      .catch((e) => console.log("getting downloadURL of image error => ", e));
-    console.log("infinite");
-  }, []);
-
-  const callback = useCallback(
-    (url) => {
-      setImageName({ profileImageUrl: url });
-      console.log("callback");
-    },
-    [imageName]
-  );
+  }, [imageName]);
 
   function onLoading(value, label) {
     setLoading(value);
@@ -120,7 +96,6 @@ export function DrawerContent(props) {
                         style={{
                           justifyContent: "center",
                           alignItems: "center",
-                          width: 50,
                           zIndex: 0,
                           alignContent: "center",
                           position: "absolute",
@@ -135,10 +110,10 @@ export function DrawerContent(props) {
                     )}
                     {
                       <Image
-                        onLoadStart={() => onLoading(true, "onLoadStart")}
-                        onLoadEnd={() => onLoading(false, "onLoadStart")}
+                        // onLoadStart={() => onLoading(true, "onLoadStart")}
+                        // onLoadEnd={() => onLoading(false, "onLoadEnd")}
                         source={{
-                          uri: imageName.profileImageUrl,
+                          uri: imageName,
                         }}
                         style={{
                           width: 55,
@@ -185,7 +160,7 @@ export function DrawerContent(props) {
                     <Text style={styles.labelCaption}>Сообщения</Text>
                   )}
                   onPress={() => {
-                    props.navigation.navigate("Tasks1", {
+                    props.navigation.navigate("Profile", {
                       uid: firebase.auth().currentUser.uid,
                     });
                   }}
@@ -226,65 +201,6 @@ export function DrawerContent(props) {
                 onPress={() => {}}
               />
               <View style={{ paddingLeft: 30 }}>
-                <DrawerItem
-                  icon={({ color, size }) => (
-                    <Icon
-                      name="checkbox-blank-circle"
-                      color="#1F4E5F"
-                      size={10}
-                    />
-                  )}
-                  label={({ color, size }) => (
-                    <Text style={styles.sublabelCaption}>Моя Команда</Text>
-                  )}
-                  onPress={() => {}}
-                />
-                <DrawerItem
-                  icon={({ color, size }) => (
-                    <Icon
-                      name="checkbox-blank-circle"
-                      color="#1F4E5F"
-                      size={10}
-                    />
-                  )}
-                  label={({ color, size }) => (
-                    <Text style={styles.sublabelCaption}>Проекты</Text>
-                  )}
-                  onPress={() => {
-                    props.navigation.navigate("Projects", {
-                      uid: firebase.auth().currentUser.uid,
-                    });
-                  }}
-                />
-              </View>
-              <DrawerItem
-                icon={({ color, size }) => (
-                  <Avatar.Image
-                    source={{
-                      uri: "https://wallpaperaccess.com/full/213588.jpg",
-                    }}
-                    size={35}
-                  />
-                )}
-                label={({ color, size }) => (
-                  <Text style={styles.BusinessCaption}>Apple Corp.</Text>
-                )}
-                onPress={() => {}}
-              />
-              <View style={{ paddingLeft: 30 }}>
-                <DrawerItem
-                  icon={({ color, size }) => (
-                    <Icon
-                      name="checkbox-blank-circle"
-                      color="#1F4E5F"
-                      size={10}
-                    />
-                  )}
-                  label={({ color, size }) => (
-                    <Text style={styles.sublabelCaption}>Моя Команда</Text>
-                  )}
-                  onPress={() => {}}
-                />
                 <DrawerItem
                   icon={({ color, size }) => (
                     <Icon

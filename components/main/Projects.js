@@ -20,6 +20,15 @@ import {
   Rubik_500Medium,
   Rubik_700Bold,
 } from "@expo-google-fonts/rubik";
+import { bindActionCreators } from "redux";
+import {
+  fetchUsersData,
+  fetchUserPosts,
+  fetchUserFollowing,
+  fetchUsersFollowingPosts,
+  clearData,
+  fetchUserProjects,
+} from "../../redux/actions/index";
 import {
   Avatar,
   Title,
@@ -32,6 +41,7 @@ import {
 } from "react-native-paper";
 import CircularProgress from "react-native-circular-progress-indicator";
 import { connect } from "react-redux";
+var _ = require("lodash");
 
 function Projects(props) {
   const [value, setValue] = useState(0);
@@ -48,32 +58,26 @@ function Projects(props) {
   useEffect(() => {
     setProjects([]);
     console.log(projects);
+    load();
+
+    setRefreshing(false);
+  }, [props.projects]);
+
+  async function load() {
     const ref = firebase.firestore().collection("ProjectUsers");
     ref
       .where("userID", "==", firebase.auth().currentUser.uid)
       .get()
       .then((snapshot) => {
         let projects1 = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          console.log(doc.data().projectID);
           for (let i = 0; i < props.projects.length; i++) {
             if (doc.data().projectID == props.projects[i].projectID) {
               setProjects((projects) => [...projects, props.projects[i]]);
             }
           }
-          const id = doc.id;
-          return { id, ...data };
         });
       });
-    setRefreshing(false);
-  }, []);
-
-  const generateColor = () => {
-    const randomColor = Math.floor(Math.random() * 16777215)
-      .toString(16)
-      .padStart(6, "0");
-    return `#${randomColor}`;
-  };
+  }
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -81,40 +85,8 @@ function Projects(props) {
   };
 
   const makeRemoteRequest = () => {
-    setProjects([]);
-
-    firebase
-      .firestore()
-      .collection("projects")
-      .orderBy("creation", "asc")
-      .get()
-      .then((snapshot) => {
-        let projects = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          const id = doc.id;
-          console.log(data);
-          return { id, ...data };
-        });
-        setTempProjects(projects);
-      });
-
-    const ref = firebase.firestore().collection("ProjectUsers");
-    ref
-      .where("userID", "==", firebase.auth().currentUser.uid)
-      .get()
-      .then((snapshot) => {
-        let projects1 = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          console.log(doc.data().projectID);
-          for (let i = 0; i < tempProjects.length; i++) {
-            if (doc.data().projectID == tempProjects[i].projectID) {
-              setProjects((projects) => [...projects, tempProjects[i]]);
-            }
-          }
-          const id = doc.id;
-          return { id, ...data };
-        });
-      });
+    props.clearData();
+    props.fetchUserProjects();
     setRefreshing(false);
   };
   console.log(projects);
@@ -139,10 +111,10 @@ function Projects(props) {
               <Text style={styles.headerText}>Проекты</Text>
               <TouchableOpacity
                 onPress={() => {
-                  props.navigation.navigate("Search");
+                  props.navigation.navigate("createProject");
                 }}
               >
-                <Icon name="dots-vertical" color="#1F4E5F" size={30} />
+                <Icon name="plus" color="#1F4E5F" size={30} />
               </TouchableOpacity>
             </View>
           </View>
@@ -160,11 +132,20 @@ function Projects(props) {
               <FlatList
                 numColumns={1}
                 horizontal={false}
-                data={projects}
+                data={_.uniqBy(projects, "id")}
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
                 renderItem={({ item }) => (
                   <TouchableOpacity
+                    onPress={() =>
+                      props.navigation.navigate("projectOverview", {
+                        projectId: item.id,
+                        uid: item.user.id,
+                        participants: item.participants,
+                        caption: item.caption,
+                        description: item.description,
+                      })
+                    }
                     style={{
                       backgroundColor: "white",
                       height: 183,
@@ -482,10 +463,25 @@ const styles = StyleSheet.create({
   },
 });
 const mapStateToProps = (store) => ({
+  users: store.usersState.users,
   currentUser: store.userState.currentUser,
   following: store.userState.following,
   projects: store.userState.projects,
   feed: store.usersState.feed,
   usersFollowingLoaded: store.usersState.usersFollowingLoaded,
 });
-export default connect(mapStateToProps, null)(Projects);
+
+const mapDispatchProps = (dispatch) =>
+  bindActionCreators(
+    {
+      clearData,
+      fetchUsersData,
+      fetchUserPosts,
+      fetchUserFollowing,
+      fetchUsersFollowingPosts,
+      fetchUserProjects,
+    },
+    dispatch
+  );
+
+export default connect(mapStateToProps, mapDispatchProps)(Projects);

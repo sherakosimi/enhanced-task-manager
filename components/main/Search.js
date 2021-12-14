@@ -56,7 +56,7 @@ export default function Search(props) {
     Rubik_500Medium,
     Rubik_700Bold,
   });
-
+  console.log(firebase.auth().currentUser.uid);
   if (!fontsLoaded) {
     return <View></View>;
   } else {

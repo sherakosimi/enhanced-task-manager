@@ -10,6 +10,7 @@ import {
 import firebase from "firebase";
 require("firebase/firestore");
 require("firebase/firebase-storage");
+import { connect } from "react-redux";
 const OPTIONS = ["DCity", "DC Сухурта", "Личное", "Deco", "Shohona"];
 const OPTIONS1 = ["sgsd", "sgdsgs", "yelldsgsdow", "gggg", "gggg"];
 const OPTIONS2 = ["Обычное", "Среднее", "Важное", "Суперважное"];
@@ -17,19 +18,37 @@ const WIDTH = Dimensions.get("window").width;
 const HEIGHT = Dimensions.get("window").height;
 
 const TaskType = (props) => {
-  const onPressItem = (option) => {
+  const [projects, setProjects] = useState([]);
+  useEffect(() => {
+    firebase
+      .firestore()
+      .collection("projects")
+      .get()
+      .then((snapshot) => {
+        let projects = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          const id = doc.id;
+          return { id, ...data };
+        });
+        setProjects(projects);
+      });
+  }, []);
+
+  console.log(projects);
+
+  const onPressItem = (option, id) => {
     props.changeModalVisibility(false);
-    props.setData(option);
+    props.setData(option, id);
   };
 
-  const option = OPTIONS.map((item, index) => {
+  const option = projects.map((item, index) => {
     return (
       <TouchableOpacity
         style={styles.option}
         key={index}
-        onPress={() => onPressItem(item)}
+        onPress={() => onPressItem(item.caption, item.id)}
       >
-        <Text style={styles.text}>{item} </Text>
+        <Text style={styles.text}>{item.caption} </Text>
       </TouchableOpacity>
     );
   });
@@ -42,7 +61,6 @@ const TaskType = (props) => {
       <View
         style={{
           width: WIDTH - 20,
-
           backgroundColor: "white",
           borderRadius: 10,
         }}

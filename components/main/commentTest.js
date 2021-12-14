@@ -34,22 +34,6 @@ function commentTest(props) {
   const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
-    function matchUserToComment(comments) {
-      for (let i = 0; i < comments.length; i++) {
-        if (comments[i].hasOwnProperty("user")) {
-          continue;
-        }
-
-        const user = props.users.find((x) => x.uid === comments[i].creator);
-        if (user == undefined) {
-          props.fetchUsersData(comments[i].creator, false);
-        } else {
-          comments[i].user = user;
-        }
-      }
-      setComments(comments);
-    }
-
     if (props.route.params.postId !== postId) {
       firebase
         .firestore()
@@ -72,6 +56,21 @@ function commentTest(props) {
       matchUserToComment(comments);
     }
   }, [props.route.params.postId, props.users]);
+
+  async function matchUserToComment(comments) {
+    for (let i = 0; i < comments.length; i++) {
+      if (comments[i].hasOwnProperty("user")) {
+        continue;
+      }
+      const user = props.users.find((x) => x.uid === comments[i].creator);
+      if (user == undefined) {
+        props.fetchUsersData(comments[i].creator, false);
+      } else {
+        comments[i].user = user;
+      }
+    }
+    setComments(comments);
+  }
 
   const onCommentSend = () => {
     firebase
@@ -128,11 +127,7 @@ function commentTest(props) {
                   <Icon name="chevron-left" color="#1F4E5F" size={35} />
                 </TouchableOpacity>
 
-                <Icon
-                  name="account-plus-outline"
-                  color="transparent"
-                  size={30}
-                />
+                <Icon name="dots-vertical" color="#1F4E5F" size={30} />
               </View>
               <View
                 style={{
@@ -140,10 +135,9 @@ function commentTest(props) {
                   alignSelf: "center",
                 }}
               >
-                <Text style={styles.caption}>Веб-сайт для DC-Сугурта</Text>
+                <Text style={styles.caption}>{props.route.params.caption}</Text>
                 <Text style={styles.description}>
-                  Поменять иконки для сайта DC-Сугурта. Подогнать под все
-                  размеры экранов.
+                  {props.route.params.description}
                 </Text>
                 <View
                   style={{
@@ -155,9 +149,39 @@ function commentTest(props) {
                   <View style={{ flexDirection: "column" }}>
                     <Text style={styles.teamCaption}>Команда</Text>
                     <View style={{ flexDirection: "row", height: 60 }}>
-                      <View style={styles.personCircle}></View>
-                      <View style={styles.personCircle}></View>
-                      <View style={styles.personCircle}></View>
+                      <FlatList
+                        numColumns={5}
+                        horizontal={false}
+                        data={props.route.params.participants}
+                        renderItem={({ item }) => (
+                          <View style={styles.personCircle}>
+                            {item.url == "" ? (
+                              <Image
+                                style={{
+                                  width: 26,
+                                  height: 26,
+                                  borderRadius: 100,
+                                }}
+                                source={{
+                                  uri:
+                                    "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-social-media-user-vector-image-icon-default-avatar-profile-icon-social-media-user-vector-image-209162840.jpg",
+                                }}
+                              />
+                            ) : (
+                              <Image
+                                style={{
+                                  width: 26,
+                                  height: 26,
+                                  borderRadius: 100,
+                                }}
+                                source={{
+                                  uri: item.url,
+                                }}
+                              />
+                            )}
+                          </View>
+                        )}
+                      />
                     </View>
                   </View>
                   <TouchableOpacity

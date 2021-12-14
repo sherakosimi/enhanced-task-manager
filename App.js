@@ -116,9 +116,18 @@ export class App extends Component {
               name="Profile"
               component={ProfileScreen}
               navigation={this.props.navigation}
+              options={{ headerShown: false }}
             />
-            <Stack.Screen name="Tasks" component={TasksScreen} />
-            <Stack.Screen name="Calendar" component={CalendarScreen} />
+            <Stack.Screen
+              name="Tasks"
+              component={TasksScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Calendar"
+              component={CalendarScreen}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="ProfileDesign"
               component={ProfileDesign}
@@ -140,6 +149,13 @@ export class App extends Component {
               name="Save"
               component={SaveScreen}
               navigation={this.props.navigation}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Projects1"
+              component={Projects}
+              navigation={this.props.navigation}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="Profile Page"
