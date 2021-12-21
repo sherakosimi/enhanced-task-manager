@@ -73,11 +73,7 @@ export default function Search(props) {
           <View style={styles.headerContainer}>
             <View style={styles.headerContainer1}>
               <TouchableOpacity onPress={() => props.navigation.popToTop()}>
-                <Icon
-                  name="chevron-left-circle-outline"
-                  color="#1F4E5F"
-                  size={30}
-                />
+                <Icon name="chevron-left" color="#1F4E5F" size={30} />
               </TouchableOpacity>
               <Text style={styles.headerText}>Добавить Друга</Text>
               <Icon name="account-plus-outline" color="transparent" size={30} />

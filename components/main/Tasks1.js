@@ -87,6 +87,20 @@ function Tasks1(props) {
     setRefreshing(false);
   };
 
+  const taskDone = (id, userID) => {
+    console.log("go");
+    firebase
+      .firestore()
+      .collection("posts")
+      .doc(userID)
+      .collection("userPosts")
+      .doc(id)
+      .update({
+        done: true,
+      });
+    setPosts(posts.filter((item) => item.id !== id));
+  };
+
   const handleRefresh = () => {
     setRefreshing(true);
     makeRemoteRequest();
@@ -98,23 +112,22 @@ function Tasks1(props) {
     return (
       <View style={styles.container}>
         <View style={styles.headerContainer}>
-          <LinearGradient
-            style={{ height: "100%" }}
-            colors={["#8FEDFF", "#8DC2DC", "#DEE9FA"]}
-          >
+          <View style={{ height: "100%", backgroundColor: "#14213D" }}>
             <View style={styles.headerMenu}>
               <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
-                <Icon
-                  name="menu"
-                  color="#1F4E5F"
-                  size={30}
-                  style={{ paddingLeft: "6%" }}
-                />
+                <Icon name="menu" color="#FCA311" size={30} />
               </TouchableOpacity>
-              <Image
-                style={{ width: "8%", height: "90%", marginRight: "7%" }}
-                source={require("./logoLetterTr.png")}
-              />
+              <View style={styles.sortIcons}>
+                <TouchableOpacity style={styles.icon} onPress={handleRefresh}>
+                  <Icon name="sort" color="#FCA311" size={25} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.icon2}
+                  onPress={() => props.navigation.navigate("CreateTask")}
+                >
+                  <Icon name="plus" color="#FCA311" size={25} />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.dateContainer}>
@@ -157,21 +170,6 @@ function Tasks1(props) {
                 <Text style={styles.dayBox}>4</Text>
               </TouchableOpacity>
             </View>
-          </LinearGradient>
-        </View>
-
-        <View style={styles.lowerHeader}>
-          <Text style={styles.listCaption}>Лист Задач</Text>
-          <View style={styles.sortIcons}>
-            <TouchableOpacity style={styles.icon} onPress={handleRefresh}>
-              <Icon name="sort" color="white" size={23} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.icon2}
-              onPress={() => props.navigation.navigate("CreateTask")}
-            >
-              <Icon name="plus" color="white" size={23} />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -183,101 +181,144 @@ function Tasks1(props) {
             onRefresh={handleRefresh}
             data={_.uniqBy(posts, "id")}
             renderItem={({ item }) => (
-              <View style={styles.taskSection}>
-                <View style={styles.sideIcons}>
-                  <Icon name="circle-double" color="#3C6C8F" size={30} />
-                  <View style={styles.line}></View>
-                </View>
-                <TouchableOpacity
-                  style={styles.taskBox}
-                  onPress={() =>
-                    props.navigation.navigate("Comment", {
-                      postId: item.id,
-                      uid: item.user.id,
-                      participants: item.participants,
-                      caption: item.caption,
-                      description: item.description,
-                    })
-                  }
-                >
-                  <View style={styles.boxHeader}>
-                    <View style={styles.boxCaption}>
-                      <Text style={styles.boxMainText}>{item.caption}</Text>
-                      <Text style={styles.boxDescription}>
-                        {item.description}
-                      </Text>
+              <View>
+                {!item.done ? (
+                  <View style={styles.taskSection}>
+                    <View style={styles.sideIcons}>
+                      <Icon name="circle-double" color="#3C6C8F" size={30} />
+                      <View
+                        style={{
+                          height: "70%",
+                          width: 2,
+                          backgroundColor: "#3C6C8F",
+                          marginBottom: "3%",
+                        }}
+                      ></View>
                     </View>
-                    <View style={styles.clockContainer}>
-                      <View style={styles.clock}>
-                        <Text style={styles.timeText}>{item.time}</Text>
-                      </View>
-                    </View>
-                  </View>
-                  <View style={styles.boxLower}>
-                    <View style={styles.personsContainer}>
-                      <FlatList
-                        numColumns={3}
-                        horizontal={false}
-                        data={item.participants.slice(0, 1)}
-                        renderItem={({ item }) => (
-                          <View style={styles.personCircle}>
-                            {item.url == "" ? (
-                              <Image
-                                style={{
-                                  width: 26,
-                                  height: 26,
-                                  borderRadius: 100,
-                                }}
-                                source={{
-                                  uri:
-                                    "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-social-media-user-vector-image-icon-default-avatar-profile-icon-social-media-user-vector-image-209162840.jpg",
-                                }}
-                              />
-                            ) : (
-                              <Image
-                                style={{
-                                  width: 26,
-                                  height: 26,
-                                  borderRadius: 100,
-                                }}
-                                source={{
-                                  uri: item.url,
-                                }}
-                              />
-                            )}
-                          </View>
-                        )}
-                      />
-                      {item.participants.length == 0 ? null : (
-                        <View style={styles.personCircle}>
-                          <Text style={styles.peopleMore}>
-                            +{item.participants.length - 1}
+                    <TouchableOpacity
+                      style={styles.taskBox}
+                      onPress={() =>
+                        props.navigation.navigate("Comment", {
+                          postId: item.id,
+                          uid: item.user.id,
+                          participants: item.participants,
+                          caption: item.caption,
+                          description: item.description,
+                        })
+                      }
+                    >
+                      <View style={styles.boxHeader}>
+                        <View style={styles.boxCaption}>
+                          <Text style={styles.boxMainText}>{item.caption}</Text>
+                          <Text style={styles.boxDescription}>
+                            {item.description}
                           </Text>
                         </View>
-                      )}
-                    </View>
-                    {item.participants.length == 0 ? (
-                      <View style={styles.projectBox2}>
-                        <TouchableOpacity style={styles.projectButton}>
-                          <Text style={styles.projectName}>
-                            {item.taskType}
-                          </Text>
+                        <View style={styles.clockContainer}>
+                          <View
+                            style={{
+                              width: "80%",
+                              backgroundColor: "#3C6C8F",
+                              height: "40%",
+                              alignSelf: "flex-start",
+                              marginBottom: "20%",
+                              borderRadius: 30,
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Text style={styles.timeText}>{item.time}</Text>
+                          </View>
+                        </View>
+                      </View>
+                      <View style={styles.boxLower}>
+                        <View style={styles.personsContainer}>
+                          <FlatList
+                            numColumns={3}
+                            horizontal={false}
+                            data={item.participants.slice(0, 1)}
+                            renderItem={({ item }) => (
+                              <View style={styles.personCircle}>
+                                {item.url == "" ? (
+                                  <Image
+                                    style={{
+                                      width: 26,
+                                      height: 26,
+                                      borderRadius: 100,
+                                    }}
+                                    source={{
+                                      uri:
+                                        "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-social-media-user-vector-image-icon-default-avatar-profile-icon-social-media-user-vector-image-209162840.jpg",
+                                    }}
+                                  />
+                                ) : (
+                                  <Image
+                                    style={{
+                                      width: 26,
+                                      height: 26,
+                                      borderRadius: 100,
+                                    }}
+                                    source={{
+                                      uri: item.url,
+                                    }}
+                                  />
+                                )}
+                              </View>
+                            )}
+                          />
+                          {item.participants.length == 0 ? null : (
+                            <View style={styles.personCircle}>
+                              <Text style={styles.peopleMore}>
+                                +{item.participants.length - 1}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                        {item.participants.length == 0 ? (
+                          <View style={styles.projectBox2}>
+                            <TouchableOpacity
+                              style={{
+                                width: "85%",
+                                backgroundColor: item.color,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                height: 30,
+                                borderRadius: 30,
+                              }}
+                            >
+                              <Text style={styles.projectName}>
+                                {item.project}
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        ) : (
+                          <View style={styles.projectBox}>
+                            <TouchableOpacity
+                              style={{
+                                width: "85%",
+                                backgroundColor: item.color,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                height: 30,
+                                borderRadius: 30,
+                              }}
+                            >
+                              <Text style={styles.projectName}>
+                                {item.project}
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                        <TouchableOpacity
+                          onPress={() => taskDone(item.id, item.creator)}
+                          style={styles.markIcon}
+                        >
+                          <Icon name="check" color="white" size={20} />
                         </TouchableOpacity>
                       </View>
-                    ) : (
-                      <View style={styles.projectBox}>
-                        <TouchableOpacity style={styles.projectButton}>
-                          <Text style={styles.projectName}>
-                            {item.taskType}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                    <View style={styles.markIcon}>
-                      <Icon name="check" color="white" size={20} />
-                    </View>
+                    </TouchableOpacity>
                   </View>
-                </TouchableOpacity>
+                ) : null}
               </View>
             )}
           />
@@ -304,6 +345,8 @@ const styles = StyleSheet.create({
     height: "15%",
     flexDirection: "row",
     justifyContent: "space-between",
+    width: "88%",
+    alignSelf: "center",
   },
   date: {
     marginLeft: "6%",
@@ -316,19 +359,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   dateCaption: {
-    color: "#1F4E5F",
+    color: "white",
     fontSize: 20,
     fontFamily: "Rubik_400Regular",
   },
   dateWeek: {
     paddingLeft: "3%",
     paddingTop: "2%",
-    color: "#1F4E5F",
+    color: "white",
     fontSize: 21,
     fontFamily: "Rubik_700Bold",
   },
   calendar: {
-    backgroundColor: "#1F4E5F",
+    backgroundColor: "white",
     width: "25%",
     height: "40%",
     marginRight: "5%",
@@ -337,7 +380,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   calendarText: {
-    color: "white",
+    color: "#14213D",
     fontSize: 13,
     fontFamily: "Rubik_400Regular",
   },
@@ -350,7 +393,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
   },
   box: {
-    backgroundColor: "#BCE5E7",
+    backgroundColor: "#FCA311",
     width: "12%",
     height: "70%",
     borderRadius: 16,
@@ -361,18 +404,18 @@ const styles = StyleSheet.create({
     borderColor: "#1F4E5F",
   },
   dayBox: {
-    color: "#1F4E5F",
+    color: "white",
     fontSize: 17,
     fontFamily: "Rubik_700Bold",
     marginTop: "3%",
   },
   weekBox: {
-    color: "#1F4E5F",
+    color: "white",
     fontSize: 10,
     fontFamily: "Rubik_500Medium",
   },
   box2: {
-    backgroundColor: "#1F4E5F",
+    backgroundColor: "white",
     width: "12%",
     height: "70%",
     borderRadius: 16,
@@ -383,13 +426,13 @@ const styles = StyleSheet.create({
     borderColor: "#1F4E5F",
   },
   dayBox2: {
-    color: "white",
+    color: "#FCA311",
     fontSize: 17,
     fontFamily: "Rubik_700Bold",
     marginTop: "3%",
   },
   weekBox2: {
-    color: "white",
+    color: "#FCA311",
     fontSize: 10,
     fontFamily: "Rubik_500Medium",
   },
@@ -408,22 +451,22 @@ const styles = StyleSheet.create({
   },
   sortIcons: {
     flexDirection: "row",
-    width: "22%",
+    width: "18%",
     justifyContent: "space-between",
   },
   icon: {
-    width: 35,
-    height: 35,
+    width: 30,
+    height: 30,
     borderRadius: 100,
-    backgroundColor: "#1F4E5F",
+    backgroundColor: "transparent",
     justifyContent: "center",
     alignItems: "center",
   },
   icon2: {
-    width: 35,
-    height: 35,
+    width: 30,
+    height: 30,
     borderRadius: 100,
-    backgroundColor: "#FF895D",
+    backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -454,12 +497,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     height: 120,
-  },
-  line: {
-    height: "70%",
-    width: 2,
-    backgroundColor: "#3C6C8F",
-    marginBottom: "3%",
   },
 
   taskBox: {
@@ -502,16 +539,7 @@ const styles = StyleSheet.create({
     width: "25%",
     justifyContent: "center",
   },
-  clock: {
-    width: "80%",
-    backgroundColor: "#3C6C8F",
-    height: "40%",
-    alignSelf: "flex-start",
-    marginBottom: "20%",
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
   timeText: {
     color: "white",
     fontSize: 13,
@@ -561,14 +589,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  projectButton: {
-    width: "85%",
-    backgroundColor: "#3C6C8F",
-    alignItems: "center",
-    justifyContent: "center",
-    height: 30,
-    borderRadius: 30,
-  },
+
   peopleMore: {
     color: "#3C6C8F",
     fontSize: 14,

@@ -121,18 +121,11 @@ function Friends(props) {
   } else {
     return (
       <View style={styles.container}>
-        <LinearGradient
-          style={{ height: "100%", flex: 1 }}
-          colors={[
-            "#C2F1FA",
-            "rgba(217, 242, 255, 0.53125)",
-            "rgba(228, 237, 251, 0.73)",
-          ]}
-        >
+        <View style={{ height: "100%", flex: 1, backgroundColor: "white" }}>
           <View style={styles.headerContainer}>
             <View style={styles.headerContainer1}>
               <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
-                <Icon name="menu" color="#1F4E5F" size={30} />
+                <Icon name="menu" color="#FCA311" size={30} />
               </TouchableOpacity>
               <Text style={styles.headerText}>Друзья</Text>
               <TouchableOpacity
@@ -140,7 +133,7 @@ function Friends(props) {
                   props.navigation.navigate("Search");
                 }}
               >
-                <Icon name="account-plus-outline" color="#1F4E5F" size={30} />
+                <Icon name="account-plus-outline" color="#FCA311" size={30} />
               </TouchableOpacity>
             </View>
           </View>
@@ -148,10 +141,14 @@ function Friends(props) {
             <Icon
               style={{ marginLeft: 10 }}
               name="magnify"
-              color="#A9A9A9"
+              color="#CACACA"
               size={22}
             />
-            <TextInput style={styles.input} placeholder="Поиск Друзей" />
+            <TextInput
+              style={styles.input}
+              placeholder="Поиск Друзей"
+              placeholderTextColor="#CACACA"
+            />
           </View>
           <View style={styles.listContainer}>
             <FlatList
@@ -199,7 +196,7 @@ function Friends(props) {
               )}
             />
           </View>
-        </LinearGradient>
+        </View>
       </View>
     );
   }
@@ -221,12 +218,14 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     height: 120,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#14213D",
     justifyContent: "center",
     flexDirection: "column",
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   headerText: {
-    color: "#1F4E5F",
+    color: "#FCA311",
     fontSize: 18,
     fontFamily: "Rubik_700Bold",
   },
@@ -240,6 +239,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     flexDirection: "row",
+    borderWidth: 1,
+    borderColor: "#CACACA",
   },
   input: {
     textAlign: "center",
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   friendBox2: {
-    backgroundColor: "white",
+    backgroundColor: "#FFD897",
     height: 72,
     borderRadius: 15,
     flexDirection: "row",
@@ -268,14 +269,14 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
     backgroundColor: "#1F4E5F",
-    borderRadius: 10,
+    borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
   },
   image: {
     borderRadius: 10,
-    width: 46,
-    height: 46,
+    width: 50,
+    height: 50,
   },
   userInfo: {
     height: 40,

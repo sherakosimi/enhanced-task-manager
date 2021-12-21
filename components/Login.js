@@ -7,6 +7,8 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import firebase from "firebase";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,8 +19,10 @@ import {
   Rubik_500Medium,
   Rubik_700Bold,
 } from "@expo-google-fonts/rubik";
+import { set } from "react-native-reanimated";
 
 export default function ({ navigation }) {
+  const [loading, setLoading] = useState(false);
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -63,6 +67,7 @@ export default function ({ navigation }) {
   };
 
   const onSignUp = () => {
+    setLoading(true);
     firebase
       .auth()
       .signInWithEmailAndPassword(data.email, data.password)
@@ -75,11 +80,15 @@ export default function ({ navigation }) {
   };
 
   //render is called everytime the state changes
-  if (!fontsLoaded) {
-    return <View></View>;
+  if (!fontsLoaded || loading) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#1F4E5F" />
+      </View>
+    );
   } else {
     return (
-      <View style={styles.container}>
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
         <View style={styles.headerContainer}>
           <TouchableOpacity onPress={() => navigation.popToTop()}>
             <Icon
@@ -171,19 +180,7 @@ export default function ({ navigation }) {
             <Text style={styles.buttonText}>Нет аккаунта? Зарегестрируйся</Text>
           </TouchableOpacity>
         </View>
-      </View>
-      // <View>
-      //   <TextInput
-      //     placeholder="email"
-      //     onChangeText={(val) => textInputChange(val)} //we change the state of the name with onChangeText function
-      //   />
-      //   <TextInput
-      //     placeholder="password"
-      //     secureTextEntry={true}
-      //     onChangeText={(val) => handlePasswordChange(val)} //we change the state of the name with onChangeText function
-      //   />
-      //   <Button onPress={() => onSignUp()} title="Sign In" />
-      // </View>
+      </KeyboardAvoidingView>
     );
   }
 }

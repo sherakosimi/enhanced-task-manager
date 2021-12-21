@@ -95,18 +95,11 @@ function Projects(props) {
   } else {
     return (
       <View style={styles.container}>
-        <LinearGradient
-          style={{ height: "100%" }}
-          colors={[
-            "#C2F1FA",
-            "rgba(217, 242, 255, 0.53125)",
-            "rgba(228, 237, 251, 0.73)",
-          ]}
-        >
+        <View style={{ height: "100%", backgroundColor: "white" }}>
           <View style={styles.headerContainer}>
             <View style={styles.headerContainer1}>
               <TouchableOpacity onPress={() => props.navigation.openDrawer()}>
-                <Icon name="menu" color="#1F4E5F" size={30} />
+                <Icon name="menu" color="#FCA311" size={30} />
               </TouchableOpacity>
               <Text style={styles.headerText}>Проекты</Text>
               <TouchableOpacity
@@ -114,7 +107,7 @@ function Projects(props) {
                   props.navigation.navigate("createProject");
                 }}
               >
-                <Icon name="plus" color="#1F4E5F" size={30} />
+                <Icon name="plus" color="#FCA311" size={30} />
               </TouchableOpacity>
             </View>
           </View>
@@ -122,10 +115,14 @@ function Projects(props) {
             <Icon
               style={{ marginLeft: 10 }}
               name="magnify"
-              color="#A9A9A9"
+              color="#CACACA"
               size={22}
             />
-            <TextInput style={styles.input} placeholder="Поиск Проектов" />
+            <TextInput
+              style={styles.input}
+              placeholder="Поиск Проектов"
+              placeholderTextColor="#CACACA"
+            />
           </View>
           <View style={{ width: "100%", flex: 1 }}>
             <View style={styles.listContainer}>
@@ -147,7 +144,7 @@ function Projects(props) {
                       })
                     }
                     style={{
-                      backgroundColor: "white",
+                      backgroundColor: "#FFD897",
                       height: 183,
                       borderRadius: 15,
                       marginTop: 15,
@@ -164,7 +161,7 @@ function Projects(props) {
                             <Text style={styles.caption}>{item.caption}</Text>
                           ) : null}
                           {item.description !== undefined ? (
-                            <Text style={styles.description}>
+                            <Text numberOfLines={2} style={styles.description}>
                               {item.description}
                             </Text>
                           ) : null}
@@ -192,8 +189,8 @@ function Projects(props) {
                                 ) : (
                                   <Image
                                     style={{
-                                      width: 29.4,
-                                      height: 29.4,
+                                      width: 24.4,
+                                      height: 24.4,
                                       borderRadius: 100,
                                     }}
                                     source={{
@@ -216,19 +213,19 @@ function Projects(props) {
                             </View>
                           )}
                         </View>
-                        <View style={styles.date}>
+                        {/* <View style={styles.date}>
                           <Icon
                             name="calendar-range"
                             color="#1F4E5F"
                             size={17}
                           />
                           <Text style={styles.dataRange}>17 Октября, 2021</Text>
-                        </View>
+                        </View> */}
                       </View>
                       <View style={styles.secondHalf}>
                         <View style={styles.circleBar}>
                           <CircularProgress
-                            radius={57}
+                            radius={60}
                             value={8}
                             textColor="#1F4E5F"
                             fontSize={17}
@@ -237,8 +234,27 @@ function Projects(props) {
                             inActiveStrokeOpacity={0.2}
                             inActiveStrokeWidth={6}
                             duration={3000}
-                            onAnimationComplete={() => setValue(50)}
+                            //onAnimationComplete={() => setValue(2)}
                           />
+                        </View>
+                      </View>
+                    </View>
+                    <View style={{ width: "85%" }}>
+                      <View
+                        style={{
+                          alignSelf: "flex-start",
+                          width: "90%",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <View style={styles.date}>
+                          <Icon
+                            name="calendar-range"
+                            color="#1F4E5F"
+                            size={17}
+                          />
+                          <Text style={styles.dataRange}>17 Октября, 2021</Text>
                         </View>
                         <View style={styles.taskContainer}>
                           <Icon
@@ -255,7 +271,7 @@ function Projects(props) {
               />
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </View>
     );
   }
@@ -277,12 +293,14 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     height: 120,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#14213D",
     justifyContent: "center",
     flexDirection: "column",
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   headerText: {
-    color: "#1F4E5F",
+    color: "#FCA311",
     fontSize: 18,
     fontFamily: "Rubik_700Bold",
   },
@@ -296,6 +314,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     flexDirection: "row",
+    borderWidth: 1,
+    borderColor: "#CACACA",
   },
   input: {
     textAlign: "center",
@@ -331,13 +351,13 @@ const styles = StyleSheet.create({
   },
   boxContainer: {
     marginTop: 2,
-    height: "85%",
+    // backgroundColor: "pink",
+    height: "75%",
     width: "85%",
     flexDirection: "row",
     alignItems: "center",
   },
   firsthalf: {
-    backgroundColor: "transparent",
     height: "100%",
     width: "50%",
     flexDirection: "column",
@@ -352,16 +372,16 @@ const styles = StyleSheet.create({
   },
   description: {
     color: "#4E6E79",
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: "Rubik_400Regular",
     paddingTop: 5,
+    lineHeight: 15,
   },
 
   teamCaption: {
-    paddingTop: 20,
-    paddingLeft: 6,
+    paddingTop: 9,
     color: "#1F4E5F",
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: "Rubik_500Medium",
   },
   personsContainer: {
@@ -370,61 +390,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "transparent",
 
-    marginTop: 6,
+    marginTop: 3,
     height: 35,
   },
   personCircle: {
     backgroundColor: "#3C6C8F",
-    width: 35,
-    height: 35,
+    width: 30,
+    height: 30,
     borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
   },
-  personCircle1: {
-    backgroundColor: "#3C6C8F",
-    width: 35,
-    height: 35,
-    borderRadius: 100,
-    position: "absolute",
-    marginLeft: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  personCircle2: {
-    backgroundColor: "#3C6C8F",
-    width: 35,
-    height: 35,
-    borderRadius: 100,
-    position: "absolute",
-    marginLeft: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  personCircle3: {
-    backgroundColor: "#FF895D",
-    width: 35,
-    height: 35,
-    borderRadius: 100,
-    position: "absolute",
-    marginLeft: 60,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  personCircle4: {
-    backgroundColor: "#FF895D",
-    width: 35,
-    height: 35,
-    borderRadius: 100,
-    position: "absolute",
-    marginLeft: 80,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+
   date: {
     flexDirection: "row",
-    marginLeft: 6,
-    marginTop: 10,
   },
   dataRange: {
     marginLeft: 6,
@@ -435,7 +414,6 @@ const styles = StyleSheet.create({
   },
   secondHalf: {
     width: "50%",
-    backgroundColor: "transparent",
     height: "100%",
     flexDirection: "column",
     alignItems: "center",
@@ -446,8 +424,6 @@ const styles = StyleSheet.create({
   },
   taskContainer: {
     flexDirection: "row",
-    marginLeft: 6,
-    marginTop: 9,
   },
   taskRange: {
     marginLeft: 6,

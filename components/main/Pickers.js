@@ -11,8 +11,6 @@ import firebase from "firebase";
 require("firebase/firestore");
 require("firebase/firebase-storage");
 import { connect } from "react-redux";
-const OPTIONS = ["DCity", "DC Сухурта", "Личное", "Deco", "Shohona"];
-const OPTIONS1 = ["sgsd", "sgdsgs", "yelldsgsdow", "gggg", "gggg"];
 const OPTIONS2 = ["Обычное", "Среднее", "Важное", "Суперважное"];
 const WIDTH = Dimensions.get("window").width;
 const HEIGHT = Dimensions.get("window").height;
@@ -31,14 +29,22 @@ const TaskType = (props) => {
           return { id, ...data };
         });
         setProjects(projects);
+        setProjects((projects) => [
+          ...projects,
+          {
+            caption: "Личное",
+            id: "lichnoe",
+            color: "#1F4E5F",
+          },
+        ]);
       });
   }, []);
 
   console.log(projects);
 
-  const onPressItem = (option, id) => {
+  const onPressItem = (option, id, color) => {
     props.changeModalVisibility(false);
-    props.setData(option, id);
+    props.setData(option, id, color);
   };
 
   const option = projects.map((item, index) => {
@@ -46,7 +52,7 @@ const TaskType = (props) => {
       <TouchableOpacity
         style={styles.option}
         key={index}
-        onPress={() => onPressItem(item.caption, item.id)}
+        onPress={() => onPressItem(item.caption, item.id, item.color)}
       >
         <Text style={styles.text}>{item.caption} </Text>
       </TouchableOpacity>

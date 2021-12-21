@@ -27,6 +27,12 @@ import moment from "moment";
 import firebase from "firebase";
 require("firebase/firestore");
 require("firebase/firebase-storage");
+import { Camera } from "expo-camera";
+import { bindActionCreators } from "redux";
+import { fetchUser } from "../../redux/actions/index";
+import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
+var _ = require("lodash");
 
 function createTask(props) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -34,7 +40,7 @@ function createTask(props) {
   const [date, setDate] = useState(moment().format("DD.MM.YYYY"));
   const [time, setTime] = useState(moment().format("HH:mm"));
   const [participants, setFollowing] = useState([]);
-  const [imgUrl, setImgUrl] = useState("");
+  const [color, setColor] = useState("");
   const [projectID, setProjectID] = useState("");
   const [caption, setCaption] = useState("");
   const [description, setDescription] = useState("");
@@ -45,17 +51,54 @@ function createTask(props) {
   const [isModalVisible1, setisModalVisible1] = useState(false);
   const [importantLevel, setchooseData2] = useState("Выбрать...");
   const [isModalVisible2, setisModalVisible2] = useState(false);
+  const [hasGalleyPermission, setHasGalleyPermission] = useState(null);
+  const [image, setImage] = useState([]);
+  const [file, setFile] = useState([]);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const galleyStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      setHasGalleyPermission(galleyStatus.status === "granted");
+    })();
+    setUser(props.currentUser);
+  }, [props.currentUser]);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+
+    console.log(result);
+
+    if (!result.cancelled) {
+      setImage((image) => [...image, result.uri]);
+    }
+  };
+
+  const pickDocument = async () => {
+    let result = await DocumentPicker.getDocumentAsync({});
+    console.log(result.uri);
+    console.log(result);
+
+    setFile((file) => [...file, result.uri]);
+  };
 
   const savePostData = () => {
-    setFollowing([
-      ...participants,
-      {
-        name: props.currentUser.name,
-        username: props.currentUser.username,
-        id: props.currentUser.id,
-        url: props.currentUser.url,
-      },
-    ]);
+    console.log(props.currentUser);
+
+    if (props.currentUser == undefined || props.currentUser == null) {
+      firebase
+        .firestore()
+        .collection("users")
+        .doc(firebase.auth().currentUser.uid)
+        .get()
+        .then((snapshot) => {
+          setUser(doc.data());
+        });
+    }
 
     firebase
       .firestore()
@@ -66,14 +109,16 @@ function createTask(props) {
       .set({
         creator: firebase.auth().currentUser.uid,
         id: postID,
-        taskType,
+        project: taskType,
         caption,
-        participants,
+        participants: _.uniqBy(participants, "id"),
         description,
         date,
         time,
         importantLevel,
-        user: props.currentUser,
+        color,
+        user: user,
+        done: false,
         creation: firebase.firestore.FieldValue.serverTimestamp(),
       })
       .then(function () {
@@ -82,16 +127,18 @@ function createTask(props) {
         });
       });
 
-    firebase
-      .firestore()
-      .collection("ProjectPosts")
-      .doc(postID + "_" + projectID)
-      .set({
-        postID: postID,
-        projectID: projectID,
-        inProject: true,
-        creator: firebase.auth().currentUser.uid,
-      });
+    if (taskType != "Личное") {
+      firebase
+        .firestore()
+        .collection("ProjectPosts")
+        .doc(postID + "_" + projectID)
+        .set({
+          postID: postID,
+          projectID: projectID,
+          inProject: true,
+          creator: firebase.auth().currentUser.uid,
+        });
+    }
   };
 
   const showDatePicker = () => {
@@ -126,9 +173,11 @@ function createTask(props) {
     setisModalVisible(bool);
   };
 
-  const setData = (option, id) => {
+  const setData = (option, id, color) => {
+    console.log(props.currentUser);
     setchooseData(option);
     setProjectID(id);
+    setColor(color);
 
     var s5 = Math.random()
       .toString(36)
@@ -180,6 +229,11 @@ function createTask(props) {
 
   console.log(projectID);
   console.log(postID);
+
+  if (hasGalleyPermission === false) {
+    return <View />;
+  }
+
   if (!fontsLoaded) {
     return <View></View>;
   } else {
@@ -198,10 +252,10 @@ function createTask(props) {
               <TouchableOpacity
                 onPress={() => props.navigation.goBack("Tasks1")}
               >
-                <Icon name="menu" color="#1F4E5F" size={30} />
+                <Icon name="chevron-left" color="#1F4E5F" size={30} />
               </TouchableOpacity>
-              <Text style={styles.headerText}>Друзья</Text>
-              <Icon name="account-plus-outline" color="#1F4E5F" size={30} />
+              <Text style={styles.headerText}>Создание Задачи</Text>
+              <Icon name="account-plus-outline" color="transparent" size={30} />
             </View>
           </View>
           <ScrollView>
@@ -333,7 +387,7 @@ function createTask(props) {
                 <FlatList
                   numColumns={3}
                   horizontal={false}
-                  data={participants}
+                  data={_.uniqBy(participants, "id")}
                   renderItem={({ item }) => (
                     <View
                       style={{
@@ -382,6 +436,48 @@ function createTask(props) {
                     </View>
                   )}
                 />
+              </View>
+              <View style={styles.inputForm}>
+                <View
+                  style={{
+                    width: "100%",
+                    flexDirection: "row",
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      width: "35%",
+                    }}
+                  >
+                    <Text style={styles.captionInput}>Файлы</Text>
+                    <TouchableOpacity
+                      style={styles.TouchableOpacity2}
+                      onPress={() => pickDocument()}
+                    >
+                      <Icon
+                        name="file-upload-outline"
+                        color="#1F4E5F"
+                        size={22}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View
+                    style={{
+                      flexDirection: "column",
+                      width: "35%",
+                    }}
+                  >
+                    <Text style={styles.captionInput}>Медиа</Text>
+                    <TouchableOpacity
+                      style={styles.TouchableOpacity2}
+                      onPress={() => pickImage()}
+                    >
+                      <Icon name="image" color="#1F4E5F" size={22} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
               <View style={styles.inputForm}>
                 <Text style={styles.captionInput}>Описание</Text>
@@ -503,6 +599,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  TouchableOpacity2: {
+    borderRadius: 10,
+    backgroundColor: "white",
+    alignSelf: "stretch",
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    height: 50,
+    width: 100,
+  },
 
   TouchableOpacity1: {
     height: 100,
@@ -574,5 +681,12 @@ const styles = StyleSheet.create({
 const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
 });
+const mapDispatchProps = (dispatch) =>
+  bindActionCreators(
+    {
+      fetchUser,
+    },
+    dispatch
+  );
 
-export default connect(mapStateToProps)(createTask);
+export default connect(mapStateToProps, mapDispatchProps)(createTask);

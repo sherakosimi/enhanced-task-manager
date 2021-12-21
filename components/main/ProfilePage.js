@@ -144,18 +144,11 @@ function ProfilePage(props) {
   } else {
     return (
       <View style={styles.container}>
-        <LinearGradient
-          style={{ height: "100%" }}
-          colors={[
-            "#C2F1FA",
-            "rgba(217, 242, 255, 0.53125)",
-            "rgba(228, 237, 251, 0.73)",
-          ]}
-        >
+        <View style={{ height: "100%", backgroundColor: "white" }}>
           <View style={styles.headerContainer}>
             <View style={styles.headerContainer1}>
               <TouchableOpacity onPress={() => props.navigation.popToTop()}>
-                <Icon name="chevron-left" color="#1F4E5F" size={35} />
+                <Icon name="chevron-left" color="#FCA311" size={35} />
               </TouchableOpacity>
             </View>
             <View style={styles.photoText}>
@@ -170,7 +163,7 @@ function ProfilePage(props) {
                   height: 105,
                   justifyContent: "center",
                   alignItems: "center",
-                  backgroundColor: "#1F4E5F",
+                  backgroundColor: "#FCA311",
                 }}
                 onPress={() => props.navigation.navigate("Profile")}
               >
@@ -245,7 +238,7 @@ function ProfilePage(props) {
               )}
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </View>
     );
   }
@@ -266,7 +259,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     height: 350,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#14213D",
     borderBottomLeftRadius: 50,
     borderBottomRightRadius: 50,
     justifyContent: "center",
@@ -279,7 +272,7 @@ const styles = StyleSheet.create({
     paddingTop: "7%",
   },
   taskTitle: {
-    color: "#1F4E5F",
+    color: "#FCA311",
     fontSize: 17,
     fontFamily: "Rubik_500Medium",
     textAlign: "center",
@@ -288,7 +281,7 @@ const styles = StyleSheet.create({
     paddingTop: 7,
     width: 80,
     textAlign: "center",
-    color: "#7C969F",
+    color: "white",
     fontSize: 11,
     fontFamily: "Rubik_400Regular",
   },
@@ -298,14 +291,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   name: {
-    color: "#1F4E5F",
+    color: "white",
     fontSize: 22,
     fontFamily: "Rubik_500Medium",
     textAlign: "center",
   },
   username: {
     textAlign: "center",
-    color: "#7C969F",
+    color: "white",
     fontSize: 14,
     fontFamily: "Rubik_400Regular",
   },
@@ -314,7 +307,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   button: {
-    backgroundColor: "#1F4E5F",
+    backgroundColor: "#FCA311",
     width: 150,
     height: 40,
     alignItems: "center",

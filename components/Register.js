@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  KeyboardAvoidingView,
 } from "react-native";
 import firebase from "firebase";
 require("firebase/firestore");
@@ -154,7 +155,7 @@ export default function Register({ navigation }) {
     return <View></View>;
   } else {
     return (
-      <View style={styles.container}>
+      <KeyboardAvoidingView style={styles.container} behavior="padding">
         <View style={styles.headerContainer}>
           <TouchableOpacity onPress={() => navigation.popToTop()}>
             <Icon
@@ -359,7 +360,7 @@ export default function Register({ navigation }) {
             <Text style={styles.buttonText}>Уже есть аккаунт? Войти</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }

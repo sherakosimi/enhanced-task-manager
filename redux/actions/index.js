@@ -44,13 +44,11 @@ export function fetchUserPosts() {
       .orderBy("creation", "asc")
       .get()
       .then((snapshot) => {
-        const uid = snapshot.query._.C_.path.segments[1];
-        const user = getState().userState.currentUser;
-
         let posts = snapshot.docs.map((doc) => {
+          console.log(doc.data());
           const data = doc.data();
           const id = doc.id;
-          return { id, ...data, user };
+          return { id, ...data };
         });
         dispatch({ type: USER_POSTS_STATE_CHANGE, posts });
       });
